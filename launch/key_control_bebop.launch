@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="robotName" value="bebop"/>
+
+	<remap from="/bebop/command_velocity_keyboard" to="/$(arg robotName)/command_velocity"/>
+	<remap from="/aruco_poses" to="/aruco/odometry"/>
+	<remap from="/fix" to="/$(arg robotName)/fix"/>
+	<remap from="/odom" to="/gps/odometry"/>
+
+	<node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/>
+	<node name="safe_bebop" pkg="controllers" type="safe_bebop" output="screen" args=""/>
+	<!-- node name="utm_odometry_node" pkg="gps_common" type="utm_odometry_node" output="log" args=""/ -->
+	<!-- node name="odometry" pkg="controllers" type="odometry" output="screen" args=""/ -->
+
+	<include file="$(find mocap_optitrack)/launch/mocap.launch"/>
+	<include file="$(find bebop_driver)/launch/bebop_node.launch"/>
+	<include file="$(find aruco_mapping)/launch/aruco_mapping.launch"/>
+
+	<node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" args="/bebop/image_raw"/>
+</launch>

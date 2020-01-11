@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="controller" value="pid"/> <!-- pid, fnn, fnn_it2, ann, t1flc, di_t1_flc_fm, si_it2_flc, di_it2_flc, di_it2_flc_fm -->
+
+	<arg name="noise" default="0.00"/>
+
+	<remap from="/uav/command_velocity" to="/y6/command_velocity"/>
+	<remap from="/uav/command" to="/y6/command"/>
+	<remap from="/uav/position" to="/y6/position"/>
+	<remap from="/uav/velocity" to="/y6/linear_velocity"/>
+	<remap from="/uav/noise/position" to="/y6/noise/position"/>
+	<remap from="/uav/odometry" to="/y6/odometry"/>
+	<remap from="/uav/true_odometry" to="/y6/ground_truth/odometry"/>
+	<remap from="/uav/trajectory" to="/y6/trajectory"/>
+	<remap from="/uav/trajectory_velocity" to="/y6/trajectory_velocity"/>
+	<remap from="/uav/noise" to="/y6/noise"/>
+	<remap from="/optitrack/odometry" to="/mavros/mocap/pose"/>
+	<remap from="/uav/trajectory" to="/y6/command_position"/>
+	<remap from="/y6/command_attitude" to="/y6/command_velocity"/>
+
+	<node name="safe_y6" pkg="controllers" type="safe_y6" output="screen" args=""/>
+
+	<!-- node name="noise" pkg="controllers" type="noise" output="screen" args="$(arg noise)"/ -->
+	<!-- node name="logger" pkg="controllers" type="logger" output="screen" args="$(arg controller)"/ -->
+
+	<node name="fake_mocap_px4" pkg="controllers" type="fake_mocap_px4" output="screen" args="">
+		<remap from="/in_odometry" to="/gazebo/model_states"/>
+		<remap from="/out_odometry" to="/mavros/mocap/pose"/>
+	</node>
+
+	<!-- include file="$(find mocap_optitrack)/launch/mocap.launch"/ -->
+	<include file="$(find controllers)/launch/$(arg controller).launch">
+		<arg name="robotName" value="y6"/>
+	</include>
+	<!-- include file="$(find mavros)/launch/px4.launch" -->
+		<!-- arg name="fcu_url" value="serial:///dev/ttyUSB0:921600"/ --> <!-- REAL --> 
+		<!-- arg name="fcu_url" value="udp://:14540@127.0.0.1:14557"/ --> <!-- SIMULATION -->
+	<!-- /include -->
+
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args=""/>
+	<node name="data_record" pkg="controllers" type="data_record" output="screen" args=""/>
+	<node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/>
+	<node name="motor_failure_pub" pkg="controllers" type="motor_failure_pub" output="screen" args=""/>
+	<node name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" args=""/>
+</launch>

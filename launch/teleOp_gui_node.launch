@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+	<remap from="/uav/command" to="/y6/command"/>
+	<node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/>
+        <!--node name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" args=""/-->
+</launch>

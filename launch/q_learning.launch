@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="x0" default="0"/>
+	<arg name="y0" default="0"/>
+	<arg name="z0" default="0"/>
+
+	<node name="q_learning" pkg="controllers" type="q_learning" output="screen">
+		<param name="policy_file_name" value="policy/q_learning.txt" type="str"/>
+		<param name="initial_x" value="$(arg x0)" type="double"/>
+		<param name="initial_y" value="$(arg y0)" type="double"/>
+		<param name="initial_z" value="$(arg z0)" type="double"/>
+	</node>
+</launch>

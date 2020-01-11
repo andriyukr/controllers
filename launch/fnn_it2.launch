@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="robotName" default="bebop"/>
+	<arg name="noise" default="0.00"/>
+
+	<arg name="kp" default="2.000"/>
+	<arg name="ki" default="0.000"/>
+	<arg name="kd" default="0.600"/>
+	<arg name="alpha" default="0.001"/>
+	<arg name="gamma" default="0.001"/>
+
+	<remap from="/uav/command_velocity" to="/$(arg robotName)/command/velocity_pd"/>
+	<remap from="/uav/command_velocity_pd" to="/$(arg robotName)/command/velocity_pd"/>
+	<remap from="/uav/command_velocity_fnn" to="/$(arg robotName)/command_velocity"/>
+
+	<node name="pid" pkg="controllers" type="pid" output="screen" args="$(arg kp) $(arg ki) $(arg kd)"/>
+	<node name="fnn_it2" pkg="controllers" type="fnn_it2" output="screen" args="$(arg alpha) $(arg gamma)"/>
+</launch>
