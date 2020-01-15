@@ -7,10 +7,8 @@ This is a repository for ROS package containing different fuzzy logic controller
 
 **Keywords:** controller, AI, UAV
 
-**Author: Andriy Sarabakha
-
-Affiliation: [Nanyang Technological University (NTU)](https://www.ntu.edu.sg)
-
+**Author: Andriy Sarabakha<br />
+Affiliation: [Nanyang Technological University (NTU)](https://www.ntu.edu.sg)<br />
 Maintainer: Andriy Sarabakha, andriy001@e.ntu.edu.sg**
 
 This package has been tested under [ROS] Kinetic and Ubuntu 16.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
