@@ -1,41 +1,38 @@
-# Package Name
+# ROS Package for AI-Based Controllers for UAVs
 
 ## Overview
 
-This is a template: replace, remove, and add where required. Describe here what this package does and what it's meant for in a few sentences.
+This is a repository for ROS package containing different fuzzy logic controllers for controlling unmanned aerial vehicles.
 
-**Keywords:** example, package, template
+**Keywords:** controller, AI, UAV
 
-### License
+**Author: Andriy Sarabakha<br />
+Affiliation: [Nanyang Technological University (NTU)](https://www.ntu.edu.sg)<br />
+Maintainer: Andriy Sarabakha, andriy001@e.ntu.edu.sg**
 
-The source code is released under a [BSD 3-Clause license](ros_package_template/LICENSE).
-
-**Author: Péter Fankhauser<br />
-Affiliation: [ANYbotics](https://www.anybotics.com/)<br />
-Maintainer: Péter Fankhauser, pfankhauser@anybotics.com**
-
-The PACKAGE NAME package has been tested under [ROS] Indigo and Ubuntu 14.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
-
-[![Build Status](http://rsl-ci.ethz.ch/buildStatus/icon?job=ros_best_practices)](http://rsl-ci.ethz.ch/job/ros_best_practices/)
-
-
-![Example image](doc/example.jpg)
-
+This package has been tested under [ROS] Kinetic and Ubuntu 16.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
 
 ### Publications
 
-If you use this work in an academic context, please cite the following publication(s):
+If you use this work in an academic context, please cite the following publications:
 
 * P. Fankhauser, M. Bloesch, C. Gehring, M. Hutter, and R. Siegwart: **PAPER TITLE**. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015. ([PDF](http://dx.doi.org/10.3929/ethz-a-010173654))
 
-        @inproceedings{Fankhauser2015,
-            author = {Fankhauser, P\'{e}ter and Hutter, Marco},
-            booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-            title = {{PAPER TITLE}},
-            publisher = {IEEE},
-            year = {2015}
-        }
-
+```bibtex
+@article{SARABAKHA2019105495,
+title = "Intuit before tuning: Type-1 and type-2 fuzzy logic controllers",
+journal = "Applied Soft Computing",
+volume = "81",
+pages = "105495",
+year = "2019",
+issn = "1568-4946",
+doi = "https://doi.org/10.1016/j.asoc.2019.105495",
+url = "http://www.sciencedirect.com/science/article/pii/S1568494619302650",
+author = "Andriy Sarabakha and Changhong Fu and Erdal Kayacan",
+keywords = "Type-1 fuzzy logic controllers, Interval type-2 fuzzy logic controllers, Fuzzy mapping, Aerial robotics, Unmanned aerial vehicles",
+abstract = "Although a considerable amount of effort has been put in to show that fuzzy logic controllers have exceptional capabilities of dealing with uncertainty, there are still noteworthy concerns, e.g., the design of fuzzy logic controllers is an arduous task due to the lack of closed-form input–output relationships which is a limitation to interpretability of these controllers. The role of design parameters in fuzzy logic controllers, such as position, shape, and height of membership functions, is not straightforward. Motivated by the fact that the availability of an interpretable relationship from input to output will simplify the design procedure of fuzzy logic controllers, the main aims in this work are derive fuzzy mappings for both type-1 and interval type-2 fuzzy logic controllers, analyse them, and eventually benefit from such a nonlinear mapping to design fuzzy logic controllers. Thereafter, simulation and real-time experimental results support the presented theoretical findings."
+}
+```
 
 ## Installation
 
