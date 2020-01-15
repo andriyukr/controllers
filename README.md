@@ -1,3 +1,4 @@
+
 # ROS Package for AI-Based Controllers for UAVs
 
 ## Overview
@@ -6,8 +7,8 @@ This is a repository for ROS package containing different fuzzy logic controller
 
 **Keywords:** controller, AI, UAV
 
-**Author: Andriy Sarabakha<br />
-Affiliation: [Nanyang Technological University (NTU)](https://www.ntu.edu.sg)<br />
+**Author: Andriy Sarabakha
+Affiliation: [Nanyang Technological University (NTU)](https://www.ntu.edu.sg)
 Maintainer: Andriy Sarabakha, andriy001@e.ntu.edu.sg**
 
 This package has been tested under [ROS] Kinetic and Ubuntu 16.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
@@ -16,7 +17,7 @@ This package has been tested under [ROS] Kinetic and Ubuntu 16.04. This is resea
 
 If you use this work in an academic context, please cite the following publications:
 
-* P. Fankhauser, M. Bloesch, C. Gehring, M. Hutter, and R. Siegwart: **PAPER TITLE**. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2015. ([PDF](http://dx.doi.org/10.3929/ethz-a-010173654))
+* A. Sarabakha, C. Fu, and E. Kayacan, "Intuit Before Tuning: Type-1 and Type-2 Fuzzy Logic Controllers," Applied Soft Computing, vol. 81, pp. 105495--105510, Aug. 2019. [Paper](https://doi.org/10.1016/j.asoc.2019.105495), [video](http://tiny.cc/FM-FLC).
 
 ```bibtex
 @article{SARABAKHA2019105495,
