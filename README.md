@@ -1,9 +1,9 @@
 
 # ROS Package for AI-Based Controllers for UAVs
 
-## Overview
-
 This is a repository for ROS package containing different fuzzy logic controllers for controlling unmanned aerial vehicles.
+
+## Overview
 
 **Keywords:** controller, AI, UAV
 
