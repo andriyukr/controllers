@@ -15,9 +15,11 @@ This package has been tested under [ROS] Kinetic and Ubuntu 16.04. This is resea
 
 ### Publications
 
+#### 
+
 If you use this work in an academic context, please cite the following publications:
 
-* A. Sarabakha, C. Fu, and E. Kayacan, "Intuit Before Tuning: Type-1 and Type-2 Fuzzy Logic Controllers," Applied Soft Computing, vol. 81, pp. 105495--105510, Aug. 2019. [Paper](https://doi.org/10.1016/j.asoc.2019.105495), [video](http://tiny.cc/FM-FLC).
+* A. Sarabakha, C. Fu, and E. Kayacan, "Intuit Before Tuning: Type-1 and Type-2 Fuzzy Logic Controllers," *Applied Soft Computing*, vol. 81, pp. 105495--105510, Aug. 2019. [Paper](https://doi.org/10.1016/j.asoc.2019.105495), [video](http://tiny.cc/FM-FLC).
 
 ```bibtex
 @article{SARABAKHA2019105495,
@@ -37,12 +39,6 @@ abstract = "Although a considerable amount of effort has been put in to show tha
 
 ## Installation
 
-### Installation from Packages
-
-To install all packages from the this repository as Debian packages use
-
-    sudo apt-get install ros-indigo-...
-
 ### Building from Source
 
 #### Dependencies
@@ -57,20 +53,13 @@ To install all packages from the this repository as Debian packages use
 
 To build from source, clone the latest version from this repository into your catkin workspace and compile the package using
 
-	cd catkin_workspace/src
-	git clone https://github.com/ethz-asl/ros_package_template.git
+	cd ~/catkin_workspace/src
+	git clone https://github.com/andriyukr/controllers.git
 	cd ../
 	catkin_make
 
 
-### Unit Tests
-
-Run the unit tests with
-
-	catkin_make run_tests_ros_package_template
-
-
-## Usage
+<!--- ## Usage
 
 Describe the quickest way to run this software, for example:
 
@@ -146,9 +135,11 @@ Reads temperature measurements and computed the average.
 ...
 
 
+
+
 ## Bugs & Feature Requests
 
-Please report bugs and request features using the [Issue Tracker](https://github.com/ethz-asl/ros_best_practices/issues).
+Please report bugs and request features using the [Issue Tracker](https://github.com/ethz-asl/ros_best_practices/issues). --->
 
 
 [ROS]: http://www.ros.org
