@@ -142,7 +142,13 @@ abstract = "In this paper, Levenberg–Marquardt inspired sliding mode control t
 - [Eigen] (linear algebra library)
 
 		sudo apt-get install libeigen3-dev
+		
+- [MAVROS](https://github.com/mavlink/mavros/blob/master/mavros/README.md#installation) (communication node for ROS)
 
+		sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
+
+		wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
+		./install_geographiclib_datasets.sh
 
 #### Building
 
