@@ -148,7 +148,7 @@ abstract = "In this paper, Levenberg–Marquardt inspired sliding mode control t
 
 To build from source, clone the latest version from this repository into your catkin workspace and compile the package using
 
-	cd ~/catkin_workspace/src
+	cd ~/catkin_ws/src
 	git clone https://github.com/andriyukr/controllers.git
 	cd ../
 	catkin_make
