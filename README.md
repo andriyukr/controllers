@@ -147,7 +147,7 @@ abstract = "In this paper, Levenberg–Marquardt inspired sliding mode control t
 
 		sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
 
-Then install GeographicLib datasets by running the `install_geographiclib_datasets.sh` script:
+	Then install GeographicLib datasets by running the `install_geographiclib_datasets.sh` script:
 
 		wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
 		./install_geographiclib_datasets.sh
@@ -158,6 +158,7 @@ To build from source, clone the latest version from this repository into your ca
 
 	cd ~/catkin_ws/src
 	git clone https://github.com/andriyukr/controllers.git
+	sudo chmod -R 777 controllers/
 	cd ..
 	catkin_make
 
