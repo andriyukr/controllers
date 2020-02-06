@@ -247,7 +247,7 @@ double FNN::SMC(short axis, double x1, double x1_d, double x2, double x2_d, doub
     return (f.row(axis) * W_bar)(0);
 }
 
-double FNN::LM(short axis, double x1, double d_x1, double x2, double d_x2, double tau_c, double dt){
+double FNN::LM(short axis, double x1, double x1_d, double x2, double x2_d, double tau_c, double dt){
 	// Bounds the input variables
     x1 = bound(x1, -1, 1); // position error
     x1_d = bound(x1_d, -1, 1); // derivative of the position error
@@ -279,7 +279,7 @@ double FNN::LM(short axis, double x1, double d_x1, double x2, double d_x2, doubl
     }
 	
 	// Update laws for the consequent part (weights in the FNN)
-	float delta = max(W_bar.transpose() * W_bar, alpha);
+	float delta = 0;//max(W_bar.transpose() * W_bar, alpha);
 	f_d = -gamma1 * (W_bar * W_bar.transpose() + delta * MatrixXd::Identity(3*3, 3*3)).inverse() * W_bar * sign(tau_c);
 	
 	// Update law for learning rate

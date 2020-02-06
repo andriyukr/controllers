@@ -160,14 +160,14 @@ void FNN_IT2::run(){
             velocity_msg.y = -u_f(1);
             velocity_msg.z = -u_f(2);
             velocity_msg.w = 0;
-            ann_velocity_publisher.publish(velocity_msg);
+            fnn_velocity_publisher.publish(velocity_msg);
 
 			// Publishes the update rates (for debugging)
             velocity_msg.x = alpha(0);
             velocity_msg.y = alpha(1);
             velocity_msg.z = alpha(2);
             velocity_msg.w = alpha(3);
-            ann_params_publisher.publish(velocity_msg);
+            fnn_params_publisher.publish(velocity_msg);
 
             //cout << "[FNN-IT2]: time = " << (time/c) << endl;
         }
@@ -226,14 +226,14 @@ double FNN_IT2::update(short axis, double x1, double x2, double u_c, double dt){
 /* Sign function
  * Returns the sign of a number x, i.e., y = sing(x)
  */
-short FNN::sign(double x){
+short FNN_IT2::sign(double x){
     return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
 }
 
 /* Gaussian function
  * Returns the value of the Gaussian function with center c and variance sigma, i.e., y = Gaussian(x)
  */
-double FNN::Gaussian(double c, double sigma, double x){
+double FNN_IT2::Gaussian(double c, double sigma, double x){
     return exp(-pow(x - c, 2)/pow(sigma, 2));
 }
 
@@ -249,14 +249,14 @@ double FNN_IT2::elliptic(double a, double c, double d, double x){
 /* Bound function
  * Bounds a number x between min and max values
  */
-double FNN::bound(double v, double min, double max){
+double FNN_IT2::bound(double v, double min, double max){
     return (v < min) ? min : ((v > max) ? max : v);
 }
 
 /* Bound vector function
  * Bounds all numbers in a vector v between min and max values
  */
-VectorXd FNN::bound(VectorXd v, double min, double max){
+VectorXd FNN_IT2::bound(VectorXd v, double min, double max){
     for(int i = 0; i < v.size(); ++i)
         v(i) = bound(v(i), min, max);
     return v;

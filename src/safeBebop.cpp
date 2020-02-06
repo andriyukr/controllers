@@ -121,7 +121,7 @@ void optitrackCallback(const geometry_msgs::PoseStamped& optitrack_msg){
     cout << "p = " << odometry_msg.twist.twist.angular.x << ",\t q =  " << odometry_msg.twist.twist.angular.y << ",\t r = " << odometry_msg.twist.twist.angular.z << endl;*/
 }
 
-void arucoCallback(const aruco_mapping::ArucoMarker& aruco_msg){
+/*void arucoCallback(const aruco_mapping::ArucoMarker& aruco_msg){
     marker_visibile = aruco_msg.marker_visibile;
     if(aruco_msg.marker_visibile){
         Duration dt = aruco_msg.header.stamp - time_old;
@@ -165,7 +165,7 @@ void arucoCallback(const aruco_mapping::ArucoMarker& aruco_msg){
 
         velocity << vx, vy, vz, omega_z;
     }
-}
+}*/
 
 void odometryCallback(const nav_msgs::Odometry odometry_msg){
     tf::Quaternion q(odometry_msg.pose.pose.orientation.x, odometry_msg.pose.pose.orientation.y, odometry_msg.pose.pose.orientation.z, odometry_msg.pose.pose.orientation.w);
@@ -252,7 +252,7 @@ SafeBebop::SafeBebop(int argc, char** argv){
     ros::NodeHandle node_handle;
 
     optitrack_subscriber = node_handle.subscribe("/optitrack/odometry", 1, optitrackCallback);
-    aruco_subscriber = node_handle.subscribe("/aruco/odometry", 1, arucoCallback);
+    //aruco_subscriber = node_handle.subscribe("/aruco/odometry", 1, arucoCallback);
     odometry_subscriber = node_handle.subscribe("/bebop/odom", 1, odometryCallback);
     command_subscriber = node_handle.subscribe("/bebop/command", 1, commandCallback);
     command_velocity_subscriber = node_handle.subscribe("/bebop/command_velocity", 1, commandVelocityCallback);

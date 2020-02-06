@@ -13,7 +13,7 @@
 #include <rosgraph_msgs/Clock.h>
 #include <tf/transform_datatypes.h>
 #include <sensor_msgs/NavSatFix.h>
-#include <aruco_mapping/ArucoMarker.h>
+//#include <aruco_mapping/ArucoMarker.h>
 #include <Eigen/Dense>
 
 #define MAX_X           3
