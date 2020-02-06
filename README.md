@@ -150,7 +150,7 @@ To build from source, clone the latest version from this repository into your ca
 
 	cd ~/catkin_ws/src
 	git clone https://github.com/andriyukr/controllers.git
-	cd ../
+	cd ..
 	catkin_make
 
 
