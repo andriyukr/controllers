@@ -11,9 +11,9 @@
 void odometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg){
     tf::Quaternion q(odometry_msg->pose.pose.orientation.x, odometry_msg->pose.pose.orientation.y, odometry_msg->pose.pose.orientation.z, odometry_msg->pose.pose.orientation.w);
     tf::Matrix3x3 m(q);
-    double x, y, z;
-    m.getEulerZYX(z, y, x);
-    pose << odometry_msg->pose.pose.position.x, odometry_msg->pose.pose.position.y, odometry_msg->pose.pose.position.z, z;
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+    pose << odometry_msg->pose.pose.position.x, odometry_msg->pose.pose.position.y, odometry_msg->pose.pose.position.z, yaw;
     velocity << odometry_msg->twist.twist.linear.x, odometry_msg->twist.twist.linear.y, odometry_msg->twist.twist.linear.z, odometry_msg->twist.twist.angular.z;
     //cout << "[SI_IT2_FLC] yaw = " << (180 * z / M_PI) << endl;
 

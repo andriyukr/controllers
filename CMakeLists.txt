@@ -165,63 +165,60 @@ include_directories(
 
 add_executable(fnn src/FNN.cpp)
 target_link_libraries(fnn ${catkin_LIBRARIES})
-add_dependencies(fnn ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(fnn ${PROJECT_NAME}_gencfg)
 
 add_executable(ann src/ANN.cpp)
 target_link_libraries(ann ${catkin_LIBRARIES})
-add_dependencies(ann ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(ann ${PROJECT_NAME}_gencfg)
 
 add_executable(fnn_it2 src/FNN-IT2.cpp)
 target_link_libraries(fnn_it2 ${catkin_LIBRARIES})
-add_dependencies(fnn_it2 ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(fnn_it2 ${PROJECT_NAME}_gencfg)
 
 add_executable(si_it2_flc src/SI-IT2-FLC.cpp)
 target_link_libraries(si_it2_flc ${catkin_LIBRARIES})
-add_dependencies(si_it2_flc ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(si_it2_flc ${PROJECT_NAME}_gencfg)
 
 add_executable(di_it2_flc src/DI-IT2-FLC.cpp)
 target_link_libraries(di_it2_flc ${catkin_LIBRARIES})
-add_dependencies(di_it2_flc ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(di_it2_flc ${PROJECT_NAME}_gencfg)
 
 add_executable(di_it2_flc_fm src/DI-IT2-FLC-FM.cpp)
 target_link_libraries(di_it2_flc_fm ${catkin_LIBRARIES})
-add_dependencies(di_it2_flc_fm ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(di_it2_flc_fm ${PROJECT_NAME}_gencfg)
 
 add_executable(di_t1_flc_fm src/DI-T1-FLC-FM.cpp)
 target_link_libraries(di_t1_flc_fm ${catkin_LIBRARIES})
-add_dependencies(di_t1_flc_fm ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(di_t1_flc_fm ${PROJECT_NAME}_gencfg)
 
 add_executable(pid src/PID.cpp)
 target_link_libraries(pid ${catkin_LIBRARIES})
-add_dependencies(pid ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(pid ${PROJECT_NAME}_gencfg)
 
 add_executable(fake_mocap_px4 src/fakeMocapPX4.cpp)
 target_link_libraries(fake_mocap_px4 ${catkin_LIBRARIES})
-add_dependencies(fake_mocap_px4 ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(trajectory src/trajectory.cpp)
 target_link_libraries(trajectory ${catkin_LIBRARIES})
-add_dependencies(trajectory ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(trajectory ${PROJECT_NAME}_gencfg)
 
 add_executable(teleop_key src/teleopKey.cpp)
 target_link_libraries(teleop_key ${catkin_LIBRARIES})
-add_dependencies(teleop_key ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(safe_bebop src/safeBebop.cpp)
 target_link_libraries(safe_bebop ${catkin_LIBRARIES})
-add_dependencies(safe_bebop ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(safe_y6 src/safeY6.cpp)
 target_link_libraries(safe_y6 ${catkin_LIBRARIES})
-add_dependencies(safe_y6 ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(safe_y6 ${PROJECT_NAME}_gencfg)
 
 add_executable(motor_failure_pub src/motorfailurepub.cpp)
 target_link_libraries(motor_failure_pub ${catkin_LIBRARIES})
-add_dependencies(motor_failure_pub ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(motor_failure_pub ${PROJECT_NAME}_gencfg)
 
 add_executable(data_record src/data_record.cpp)
 target_link_libraries(data_record ${catkin_LIBRARIES})
-add_dependencies(data_record ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(data_record ${PROJECT_NAME}_gencfg)
 
 #############
 ## Install ##

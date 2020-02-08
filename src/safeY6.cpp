@@ -80,11 +80,8 @@ void optitrackCallback(const geometry_msgs::PoseStamped& optitrack_msg){
     tf::Quaternion q(optitrack_msg.pose.orientation.x, optitrack_msg.pose.orientation.y, optitrack_msg.pose.orientation.z, optitrack_msg.pose.orientation.w);
     //q.normalize();
     tf::Matrix3x3 m(q);
-    double x, y, z, roll, pitch;
-    m.getEulerZYX(z, y, x);
-    roll = x;
-    pitch = y;
-    yaw = z;
+    double roll, pitch;
+    m.getRPY(roll, pitch, yaw);
     //q = tf::createQuaternionFromRPY(roll, pitch, yaw);
     odometry_msg.pose.pose.orientation = optitrack_msg.pose.orientation;
 
