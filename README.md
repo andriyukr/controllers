@@ -267,14 +267,16 @@ Reads temperature measurements and computed the average.
 
 ### NODE_B_NAME
 
-...
+... -->
 
+## Licence
 
+The source code is released under [GPLv3](http://www.gnu.org/licenses/) license.
 
+## Notes
 
-## Bugs & Feature Requests
-
-Please report bugs and request features using the [Issue Tracker](https://github.com/ethz-asl/ros_best_practices/issues). -->
+ - This code is written for research purpose and has not been fully optimized. In the future I will add more functionalities and improve efficiency, and also add more comment.
+ - Please report bugs and request features using the [Issue Tracker](https://github.com/andriyukr/controllers/issues).
 
 
 [ROS]: http://www.ros.org
