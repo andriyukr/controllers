@@ -1,17 +1,17 @@
 
 # ROS Package for AI-Based Controllers for UAVs
 
-This is a repository for ROS package containing different fuzzy logic controllers for controlling unmanned aerial vehicles.
+This ROS package contains a framework for different fuzzy logic-based (type-1, interval type-2, fuzzy mapping), artificial neural network-based and fuzzy neural network-based (with sliding mode control and Levenberg-Marquardt theory learning) controllers for the trajectory tracking of unmanned aerial vehicles.
 
 ## Overview
 
+**Author:** Andriy Sarabakha<br />
+**Affiliation:** [Nanyang Technological University (NTU)](https://www.ntu.edu.sg), Singapore<br />
+**Maintainer:** Andriy Sarabakha, andriy001@e.ntu.edu.sg
+
 **Keywords:** controller, AI, UAV
 
-**Author: Andriy Sarabakha<br />
-Affiliation: [Nanyang Technological University (NTU)](https://www.ntu.edu.sg)<br />
-Maintainer: Andriy Sarabakha, andriy001@e.ntu.edu.sg**
-
-This package has been tested under [ROS] Kinetic and Ubuntu 16.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
+This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
 
 ### Publications
 
@@ -134,16 +134,16 @@ abstract = "In this paper, Levenberg–Marquardt inspired sliding mode control t
 
 ## Installation
 
-### Building from Source
+This package has been tested under **ROS Kinetic** and **Ubuntu 16.04**.
 
-#### Dependencies
+### Dependencies
 
-- [Robot Operating System (ROS)](http://wiki.ros.org) (middleware for robotics),
-- [Eigen] (linear algebra library)
+- [Robot Operating System (ROS)](http://wiki.ros.org) - middleware for robotics,
+- [Eigen] - linear algebra library:
 
 		sudo apt-get install libeigen3-dev
 		
-- [MAVROS](https://github.com/mavlink/mavros/blob/master/mavros/README.md#installation) (communication node for ROS)
+- [MAVROS](https://github.com/mavlink/mavros/blob/master/mavros/README.md#installation) - communication node for ROS:
 
 		sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
 
@@ -151,10 +151,18 @@ abstract = "In this paper, Levenberg–Marquardt inspired sliding mode control t
 
 		wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
 		./install_geographiclib_datasets.sh
+- (optional) [bebop_autonomy](https://bebop-autonomy.readthedocs.io/en/latest/installation.html) - ROS driver for Parrot Bebop 1.0 & 2.0 UAVs:
 
-#### Building
+		mkdir -p ~/bebop_ws/src && cd ~/bebop_ws
+		catkin init
+		git clone https://github.com/AutonomyLab/bebop_autonomy.git src/bebop_autonomy
+		rosdep update
+		rosdep install --from-paths src -i
+		catkin build
 
-To build from source, clone the latest version from this repository into your catkin workspace and compile the package using
+### Building
+
+To build from source, clone the latest version from this repository into your catkin workspace and compile the package using:
 
 	cd ~/catkin_ws/src
 	git clone https://github.com/andriyukr/controllers.git
@@ -163,15 +171,38 @@ To build from source, clone the latest version from this repository into your ca
 	catkin_make
 
 
-<!--- ## Usage
+## Usage
 
-Describe the quickest way to run this software, for example:
+For the control of [PX4-based](https://px4.io) UAV in real-world, use:
 
-Run the main node with
+	roslaunch controllers y6_real.launch
+	
+For the control of [PX4-based](https://px4.io) UAV in [GAZEBO](http://gazebosim.org) simulation, use:
 
-	roslaunch ros_package_template ros_package_template.launch
+	roslaunch controllers y6_simulation.launch
+	
+For the control of [Parrot Bebop 2.0](https://www.parrot.com/us/drones/parrot-bebop-2) UAV in real-world, use:
 
-## Config files
+	roslaunch controllers control_bebop.launch
+	
+For the control of [Parrot Bebop 2.0](https://www.parrot.com/us/drones/parrot-bebop-2) in [GAZEBO](http://gazebosim.org) simulation, use:
+
+	roslaunch controllers bebop_simulation.launch
+	
+To select a controller, in `.launch` file, set `controller` argument to:
+
+- `pid` for proportional–integral–derivative (PID) controller,
+- `t1flc` for type-1 fuzzy logic controller,
+- `si_it2_flc` for single-input interval type-2 fuzzy logic controller,
+- `i_it2_flc` for double-input interval type-2 fuzzy logic controller,
+- `ann` for artificial neural network-based controller,
+- `fnn` for fuzzy neural network-based controller.
+
+For example, to select FNN-based controller, use:
+
+	<arg name="controller" value="fnn"/>
+
+<!-- ## Config files
 
 Config file folder/set 1
 
@@ -243,7 +274,7 @@ Reads temperature measurements and computed the average.
 
 ## Bugs & Feature Requests
 
-Please report bugs and request features using the [Issue Tracker](https://github.com/ethz-asl/ros_best_practices/issues). --->
+Please report bugs and request features using the [Issue Tracker](https://github.com/ethz-asl/ros_best_practices/issues). -->
 
 
 [ROS]: http://www.ros.org
