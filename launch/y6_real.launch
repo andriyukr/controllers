@@ -36,7 +36,7 @@
 		<arg name="gcs_url" value="udp-b://@"/> <!-- gcs communication -->
 	</include>
 
-	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args=""/>
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="~/catkin_ws/src/controllers/policy/waypoints.txt"/>
 	<!-- node name="motor_fail_rc" pkg="controllers" type="motor_fail_rc" output="screen" args=""/ -->
 	<!-- node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/ -->
 	<!-- node name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" args=""/ -->

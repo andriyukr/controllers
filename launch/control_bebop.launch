@@ -19,13 +19,12 @@
 
 	<node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/>
 	<node name="safe_bebop" pkg="controllers" type="safe_bebop" output="screen" args=""/>
-	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args=""/>
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="/home/andriy/catkin_ws/src/controllers/policy/waypoints.txt"/>
 	<!-- node name="noise" pkg="controllers" type="noise" output="screen" args="$(arg noise)"/ -->
-	<node name="logger" pkg="controllers" type="logger" output="screen" args="2016.10.25-$(arg controller)-wind_0-1"/>
 
 	<include file="$(find mocap_optitrack)/launch/mocap.launch"/>
 	<include file="$(find controllers)/launch/$(arg controller).launch"/>
-	<include file="$(find bebop_driver)/launch/bebop_node.launch"/>
+	<!-- include file="$(find bebop_driver)/launch/bebop_node.launch"/ -->
 	<!-- include file="$(find aruco_mapping)/launch/aruco_mapping.launch"/ -->
 
 	<node name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" args=""/>

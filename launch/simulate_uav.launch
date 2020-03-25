@@ -22,7 +22,7 @@
 
 	<node name="noise" pkg="controllers" type="noise" output="screen" args="$(arg noise)"/>
 	<node name="logger" pkg="controllers" type="logger" output="screen" args="test"/>
-	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args=""/>
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="~/catkin_ws/src/controllers/policy/waypoints.txt"/>
 
 	<include file="$(find controllers)/launch/$(arg controller).launch">
 		<arg name="robotName" value="$(arg robotName)"/>

@@ -38,7 +38,7 @@
 		<!-- arg name="fcu_url" value="udp://:14540@127.0.0.1:14557"/ --> <!-- SIMULATION -->
 	<!-- /include -->
 
-	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args=""/>
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="~/catkin_ws/src/controllers/policy/waypoints.txt"/>
 	<node name="data_record" pkg="controllers" type="data_record" output="screen" args=""/>
 	<node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/>
 	<node name="motor_failure_pub" pkg="controllers" type="motor_failure_pub" output="screen" args=""/>

@@ -59,5 +59,5 @@ class Trajectory{
           void run();
         private:
           double denormalizeAngle(double a1);
-          double distance(Vector3d v1, Vector3d v2);
+          double distance(Vector4d v1, Vector4d v2);
 };
