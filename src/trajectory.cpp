@@ -31,6 +31,7 @@ void dynamicReconfigureCallback(controllers::setTrajectoryConfig &config, uint32
     }
 
     speed = config.speed;
+    scale = config.scale;
 
     pose_d << config.x_d, config.y_d, config.z_d, config.yaw_d / 180 * M_PI;
     yaw_d = initial_local_yaw + pose_d(3); // + pose_d(3) ...... checked
@@ -73,47 +74,24 @@ Trajectory::Trajectory(int argc, char** argv){
     local_pos_subscriber = node_handle.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, localPosCallback);
 
     // Publishers
-    trajectory_publisher = node_handle.advertise<geometry_msgs::QuaternionStamped>("/uav/trajectory", 1);
-    velocity_publisher = node_handle.advertise<geometry_msgs::QuaternionStamped>("/uav/trajectory_velocity", 1);
+    trajectory_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/uav/trajectory", 1);
+    velocity_publisher = node_handle.advertise<geometry_msgs::TwistStamped>("/uav/trajectory_velocity", 1);
     trajectory_type_pub = node_handle.advertise<std_msgs::Int32>("/trajectory_type", 1);
 
     // Initializing parameters
     pose_d << 0, 0, 0, 0;
     trajectory_type = 0;
     speed = 1;
+    scale = 1;
     straight_speed = 1;
 
     yaw_d = 0;
 
-    // Input txt file for waypoints
-    cout << "File name with waypoints: " << argv[1] << endl;
-    string line;
-    ifstream myfile(argv[1]);
-    if(myfile.is_open()){
-
-        int points;
-        while(getline(myfile, line))
-            ++points;
-        waypoints = MatrixXd(points, 4);
-
-        ifstream myfile(argv[1]);
-        for(int i = 0; getline(myfile, line); ++i){
-            string delimiter = "\t";
-
-            size_t pos = 0;
-            for(int j = 0; (pos = line.find(delimiter)) != string::npos; ++j) {
-                waypoints(i, j) = atof(line.substr(0, pos).c_str());
-                line.erase(0, pos + delimiter.length());
-            }
-            waypoints(i, 3) = atof(line.c_str()) / 180 * M_PI;
-        }
-        myfile.close();
-        //cout << "[Trajectory] waypoints:\n" << waypoints << endl;
-    }
-    else
-        cout << "Unable to open file: " << argv[1] << endl;
-
-    waypoint = 0;
+    std::string file_waypoints, file_waypoints_stamped;
+    if(node_handle.getParam("/trajectory/file_waypoints", file_waypoints))
+        readWaypoints(file_waypoints);
+    if(node_handle.getParam("/trajectory/file_waypoints_stamped", file_waypoints_stamped))
+        readWaypointsStamped(file_waypoints_stamped);
 }
 
 // Destructor
@@ -132,10 +110,70 @@ double Trajectory::denormalizeAngle(double a1){
         return a1;
 }
 
+// Reads the file with waypoints
+void Trajectory::readWaypoints(std::string fileName){
+    string line;
+    ifstream myfile(fileName);
+    if(myfile.is_open()){       
+        ROS_INFO_STREAM("[trajectory] File with waypoints loaded: " << fileName);
+
+        int points = 0;
+        while(getline(myfile, line))
+            ++points;
+        waypoints = MatrixXd(points - 1, 4);
+
+        ifstream myfile(fileName);
+        getline(myfile, line); // reads out the header
+        for(int i = 0; getline(myfile, line); ++i){
+            string delimiter = "\t";
+            size_t pos = 0;
+            for(int j = 0; (pos = line.find(delimiter)) != string::npos; ++j) {
+                waypoints(i, j) = atof(line.substr(0, pos).c_str());
+                line.erase(0, pos + delimiter.length());
+            }
+            waypoints(i, 3) = atof(line.c_str()) / 180 * M_PI;
+        }
+        myfile.close();
+        ROS_DEBUG_STREAM("[Trajectory] waypoints:\n" << waypoints);
+    }
+    else
+        ROS_WARN_STREAM("[trajectory] Unable to open file with waypoints: " << fileName);
+}
+
+// Reads the file with stamped waypoints and calculates the fitting curve
+void Trajectory::readWaypointsStamped(std::string fileName){
+    string line;
+    ifstream myfile(fileName);
+    if(myfile.is_open()){
+        ROS_INFO_STREAM("[trajectory] File with stamped waypoints loaded: " << fileName);
+
+        int points = 0;
+        while(getline(myfile, line))
+            ++points;
+        MatrixXd waypoints = MatrixXd(points - 1, 5);
+
+        ifstream myfile(fileName);
+        getline(myfile, line); // reads out the header
+        for(int i = 0; getline(myfile, line); ++i){
+            string delimiter = "\t";
+            size_t pos = 0;
+            for(int j = 0; (pos = line.find(delimiter)) != string::npos; ++j) {
+                waypoints(i, j) = atof(line.substr(0, pos).c_str());
+                line.erase(0, pos + delimiter.length());
+            }
+            waypoints(i, 4) = atof(line.c_str()) / 180 * M_PI;
+        }
+        myfile.close();
+        ROS_DEBUG_STREAM("[Trajectory] waypoints stamped:\n" << waypoints);
+    }
+    else
+        ROS_WARN_STREAM("[trajectory] Unable to open file with stamped waypoints: " << fileName);
+}
+
 void Trajectory::run(){
     /* Take initial yaw angle
      *
-     * This loop waits for the estimator to stabilize and send the yaw values [from safe_y6]
+     * This loop waits for the estimator to stabilize and send the yaw values [from safe_px4]
      * This value is taken as the initial yaw reference [denormalized] for the UAV to always point in the intitial desired direction
      * The UAV can go +180 deg to -179 deg from this initial yaw
      *
@@ -148,8 +186,6 @@ void Trajectory::run(){
     f = boost::bind(&dynamicReconfigureCallback, _1, _2);
     server.setCallback(f);
 
-    double scale = 1;
-
     Vector4d trajectory;
     Vector4d velocity;
     t = 0;
@@ -159,7 +195,6 @@ void Trajectory::run(){
     Vector4d w2;
 
     double var_speed = 0;
-    //    double speed_slow = speed;
     double d = 0;
     double x,y;
 
@@ -194,71 +229,46 @@ void Trajectory::run(){
             break;
         case 3: // waypoints
             if(waypoint < waypoints.rows() - 1){
-                cout << "[Trajectory]: waypoint = " << waypoint << endl;
                 w1 << waypoints.row(waypoint).transpose();
                 w2 << waypoints.row(waypoint + 1).transpose();
                 double d = distance(w1, w2);
                 trajectory << (1 - t / d) * w1 + t / d * w2;
                 velocity << (w2 - w1) / d * speed;
-                //cout << "[Trajectory]: velocity = " << velocity.transpose() << endl;
-
                 if(t >= d){
                     t = 0;
                     waypoint++;
                 }
-                //cout << "[Trajectory]: OK5" << endl;
             }
             else{
                 trajectory << waypoints.bottomRows(1).transpose();
                 velocity << 0, 0, 0, 0;
             }
+            if(t == 0)
+                ROS_INFO_STREAM("[Trajectory]: waypoint #" << waypoint << " = " << w2.transpose());
             break;
-        case 4: // agile waypoints --  zig-zag + straight-line [original/go-away]
-            if(waypoint < waypoints.rows() - 2){
-                //cout << "[Trajectory]: waypoint = " << waypoint << endl;
+        case 4: // stamped waypoints
+            t -= speed * dt;
+            t += dt;
+            if(waypoint < waypoints.rows() - 1){
                 w1 << waypoints.row(waypoint).transpose();
                 w2 << waypoints.row(waypoint + 1).transpose();
                 double d = distance(w1, w2);
-                trajectory << (1 - t / d) * w1 + t / d * w2, yaw_d;
-                x = trajectory(0)*cos(-yaw_d) + trajectory(1)*sin(-yaw_d);
-                y = trajectory(1)*cos(-yaw_d) - trajectory(0)*sin(-yaw_d);
-                trajectory << x, y, trajectory(2), yaw_d;
+                trajectory << (1 - t / d) * w1 + t / d * w2;
+                velocity << d / t;
                 if(t >= d){
-                    t = 0;
-                    t_straight = 0;
                     waypoint++;
                 }
             }
-            else if(waypoint < waypoints.rows() - 1){
-                t_straight += straight_speed * dt;
-                //cout << "[Trajectory]: waypoint = " << waypoint << endl;
-                w1 << waypoints.row(waypoint).transpose();
-                w2 << waypoints.row(waypoint + 1).transpose();
-                double d = distance(w1, w2);
-                trajectory << (1 - t_straight / d) * w1 + t_straight / d * w2, yaw_d;
-                x = trajectory(0)*cos(-yaw_d) + trajectory(1)*sin(-yaw_d);
-                y = trajectory(1)*cos(-yaw_d) - trajectory(0)*sin(-yaw_d);
-                trajectory << x, y, trajectory(2), yaw_d;
-                if(t_straight >= d){
-                    t = 0;
-                    t_straight = 0;
-                    waypoint++;
-                }
+            else{
+                trajectory << waypoints.bottomRows(1).transpose();
+                velocity << 0, 0, 0, 0;
             }
-            else
-                trajectory << waypoints.bottomRows(1).transpose(), yaw_d;
-            velocity << 0, 0, 0, 0;
+            if(t == 0)
+                ROS_INFO_STREAM("[Trajectory]: waypoint #" << waypoint << " = " << w2.transpose());
             break;
         case 5: // Circle
-            trajectory << scale * sin(t) + pose_d(0), scale * cos(t) + pose_d(1), pose_d(2), pose_d(3);
-            velocity << speed * cos(t), -speed * sin(t), 0, 0;
-            break;
-        case 13: // Vertical circle
-            // Uncomment to change yaw while performing circle
-            //yaw_d = fmod(t, 2 * M_PI) - M_PI;
-
-            trajectory << trajectory(0), 2*cos(t), pose_d(2) + 2*sin(t), yaw_d;
-            velocity << 0, -2*speed * sin(t), 2*speed * cos(t), 0;
+            trajectory << scale * sin(t/scale) + pose_d(0), scale * cos(t/scale) + pose_d(1), pose_d(2), pose_d(3);
+            velocity << speed * cos(t/scale), -speed * sin(t/scale), 0, 0;
             break;
         case 6: // smooth 8
             trajectory << sqrt(2) / 2 * 4 / (3 - cos(2 * t)) * cos(t) + pose_d(0), sqrt(2) / 2 * 4 / (3 - cos(2 * t)) * cos(t) + pose_d(1), 4 / (3 - cos(2 * t)) * sin(2 * t) / 2 + pose_d(2) + 0.5, pose_d(3);
@@ -369,26 +379,69 @@ void Trajectory::run(){
             trajectory << 2 * sin(t), 2 * cos(t), pose_d(2), pose_d(3) - t + M_PI;
             velocity << speed * cos(t), -speed * sin(t), 0, -speed;
             break;
+        case 13: // Vertical circle
+            // Uncomment to change yaw while performing circle
+            //yaw_d = fmod(t, 2 * M_PI) - M_PI;
+
+            trajectory << trajectory(0), 2*cos(t), pose_d(2) + 2*sin(t), yaw_d;
+            velocity << 0, -2*speed * sin(t), 2*speed * cos(t), 0;
+            break;
+        case 14: // zig-zag + straight-line [original/go-away]
+            if(waypoint < waypoints.rows() - 2){
+                //cout << "[Trajectory]: waypoint = " << waypoint << endl;
+                w1 << waypoints.row(waypoint).transpose();
+                w2 << waypoints.row(waypoint + 1).transpose();
+                double d = distance(w1, w2);
+                trajectory << (1 - t / d) * w1 + t / d * w2, yaw_d;
+                x = trajectory(0)*cos(-yaw_d) + trajectory(1)*sin(-yaw_d);
+                y = trajectory(1)*cos(-yaw_d) - trajectory(0)*sin(-yaw_d);
+                trajectory << x, y, trajectory(2), yaw_d;
+                if(t >= d){
+                    t = 0;
+                    t_straight = 0;
+                    waypoint++;
+                }
+            }
+            else if(waypoint < waypoints.rows() - 1){
+                t_straight += straight_speed * dt;
+                //cout << "[Trajectory]: waypoint = " << waypoint << endl;
+                w1 << waypoints.row(waypoint).transpose();
+                w2 << waypoints.row(waypoint + 1).transpose();
+                double d = distance(w1, w2);
+                trajectory << (1 - t_straight / d) * w1 + t_straight / d * w2, yaw_d;
+                x = trajectory(0)*cos(-yaw_d) + trajectory(1)*sin(-yaw_d);
+                y = trajectory(1)*cos(-yaw_d) - trajectory(0)*sin(-yaw_d);
+                trajectory << x, y, trajectory(2), yaw_d;
+                if(t_straight >= d){
+                    t = 0;
+                    t_straight = 0;
+                    waypoint++;
+                }
+            }
+            else
+                trajectory << waypoints.bottomRows(1).transpose(), yaw_d;
+            velocity << 0, 0, 0, 0;
+            break;
         }
 
         double v = sqrt(velocity(0) * velocity(0) + velocity(1) * velocity(1));
 
         // Publish the reference trajectory
-        geometry_msgs::QuaternionStamped trajectory_msg;
+        geometry_msgs::PoseStamped trajectory_msg;
         trajectory_msg.header.stamp = ros::Time::now();
-        trajectory_msg.quaternion.x = trajectory(0);
-        trajectory_msg.quaternion.y = trajectory(1);
-        trajectory_msg.quaternion.z = trajectory(2);
-        trajectory_msg.quaternion.w = trajectory(3);
+        trajectory_msg.pose.position.x = trajectory(0);
+        trajectory_msg.pose.position.y = trajectory(1);
+        trajectory_msg.pose.position.z = trajectory(2);
+        trajectory_msg.pose.orientation.z = trajectory(3);
         trajectory_publisher.publish(trajectory_msg);
 
         // Publish the corresponding reference trajectory velocity
-        geometry_msgs::QuaternionStamped velocity_msg;
+        geometry_msgs::TwistStamped velocity_msg;
         velocity_msg.header.stamp = ros::Time::now();
-        velocity_msg.quaternion.x = velocity(0);
-        velocity_msg.quaternion.y = velocity(1);
-        velocity_msg.quaternion.z = velocity(2);
-        velocity_msg.quaternion.w = velocity(3);
+        velocity_msg.twist.linear.x = velocity(0);
+        velocity_msg.twist.linear.y = velocity(1);
+        velocity_msg.twist.linear.z = velocity(2);
+        velocity_msg.twist.angular.z = velocity(3);
         velocity_publisher.publish(velocity_msg);
 
         //cout << "[Trajectory]: trajectory = " << trajectory.transpose() << endl;

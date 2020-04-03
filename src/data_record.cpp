@@ -200,11 +200,10 @@ void data_record::run(){
     }
 
     // Create a temporary file to store the data
-    string path_dir = ros::package::getPath("controllers") + "/Data/";
-    string tmpfile = "tempData.txt";
-    //outputFile.open(path_dir + tmpfile);
+    string path_dir = ros::package::getPath("controllers") + "/results/";
+    string tmpfile = "data.txt";
     outputFile.open(path_dir + tmpfile);
-    ROS_INFO("File created with name: %s!",tmpfile.c_str());
+    ROS_INFO("[data_record] Log file: %s",tmpfile.c_str());
 
 
     // Initialize time variables

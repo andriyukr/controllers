@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="controller" value="pid"/> <!-- pid, fnn, fnn_it2, ann -->
+
+	<arg name="noise" default="0.00"/>
+
+	<remap from="/uav/command_velocity" to="/y6/command_velocity"/>
+	<remap from="/uav/command" to="/y6/command"/>
+	<remap from="/uav/position" to="/y6/position"/>
+	<remap from="/uav/velocity" to="/y6/linear_velocity"/>
+	<remap from="/uav/noise/position" to="/y6/noise/position"/>
+	<remap from="/uav/odometry" to="/y6/odometry"/>
+	<remap from="/uav/true_odometry" to="/y6/ground_truth/odometry"/>
+	<remap from="/uav/trajectory" to="/y6/trajectory"/>
+	<remap from="/uav/trajectory_velocity" to="/y6/trajectory_velocity"/>
+	<remap from="/uav/noise" to="/y6/noise"/>
+	<remap from="/optitrack/odometry" to="/mavros/mocap/pose"/>
+	<remap from="/uav/trajectory" to="/y6/command_position"/>
+	<remap from="/y6/command_attitude" to="/y6/command_velocity"/>
+
+	<node name="safe_y6" pkg="controllers" type="safe_y6" output="screen" args=""/>
+
+	<!-- node name="noise" pkg="controllers" type="noise" output="screen" args="$(arg noise)"/ -->
+	<!-- node name="logger" pkg="controllers" type="logger" output="screen" args="$(arg controller)"/ -->
+
+
+	<!-- remap from="Robot_1/pose" to="/mavros/mocap/pose"/ -->
+
+	<!-- include file="$(find mocap_optitrack)/launch/mocap.launch"/ -->
+	<include file="$(find controllers)/launch/$(arg controller).launch">
+		<arg name="robotName" value="y6"/>
+	</include>
+	<include file="$(find mavros)/launch/px4.launch">
+		<arg name="fcu_url" value="serial:///dev/ttyUSB0:921600"/> <!-- REAL -->
+		<arg name="gcs_url" value="udp-b://@"/> <!-- gcs communication -->
+	</include>
+
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="~/catkin_ws/src/controllers/policy/waypoints.txt"/>
+	<!-- node name="motor_fail_rc" pkg="controllers" type="motor_fail_rc" output="screen" args=""/ -->
+	<!-- node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/ -->
+	<!-- node name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" args=""/ -->
+
+ 	<!-- Pass in mocap_config_file:=/path/to/config.yaml to change options. -->
+  	<arg name="mocap_config_file" default="$(find mocap_optitrack)/config/mocap.yaml" />
+
+        <remap from="/Robot_1/pose" to="/mavros/mocap/pose"/>
+
+  	<node pkg="mocap_optitrack"
+        	type="mocap_node"
+        	name="mocap_node"
+        	respawn="false"
+        	launch-prefix=""
+        	required="true">
+    	<rosparam file="$(arg mocap_config_file)" command="load" />
+  	</node>
+
+</launch>

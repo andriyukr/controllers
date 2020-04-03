@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="controller" value="pid"/> <!-- pid, fnn, fnn_it2, ann, t1flc, di_t1_flc_fm, si_it2_flc, di_it2_flc, di_it2_flc_fm -->
+	<arg name="file_waypoints" value="$(find controllers)/policy/waypoints.txt"/>
+	<arg name="file_waypoints_stamped" value="$(find controllers)/policy/waypoints_stamped.txt"/>
+	<arg name="vehicle" value="uav"/>
+	<arg name="noise" default="0.00"/>
+
+	<remap from="/uav/command_velocity" to="/$(arg vehicle)/command_velocity"/>
+	<remap from="/uav/command" to="/$(arg vehicle)/command"/>
+	<remap from="/uav/position" to="/$(arg vehicle)/position"/>
+	<remap from="/uav/velocity" to="/$(arg vehicle)/linear_velocity"/>
+	<remap from="/uav/noise/position" to="/$(arg vehicle)y6/noise/position"/>
+	<remap from="/uav/odometry" to="/$(arg vehicle)/odometry"/>
+	<remap from="/uav/true_odometry" to="/$(arg vehicle)/ground_truth/odometry"/>
+	<remap from="/uav/trajectory" to="/$(arg vehicle)/trajectory"/>
+	<remap from="/uav/trajectory_velocity" to="/$(arg vehicle)/trajectory_velocity"/>
+	<remap from="/uav/noise" to="/$(arg vehicle)/noise"/>
+	<remap from="/optitrack/odometry" to="/mavros/vision_pose/pose"/>
+	<remap from="/uav/trajectory" to="/$(arg vehicle)/command_position"/>
+	<!-- remap from="/$(arg vehicle)/command_attitude" to="/$(arg vehicle)/command_velocity"/ -->
+
+	<node name="safe_px4" pkg="controllers" type="safe_px4" output="screen" args=""/>
+
+	<!-- node name="noise" pkg="controllers" type="noise" output="screen" args="$(arg noise)"/ -->
+	<!-- node name="logger" pkg="controllers" type="logger" output="screen" args="$(arg controller)"/ -->
+
+	<node name="fake_mocap_px4" pkg="controllers" type="fake_mocap_px4" output="screen" args="">
+		<remap from="/in_odometry" to="/gazebo/model_states"/>
+		<remap from="/out_odometry" to="/mavros/vision_pose/pose"/>
+	</node>
+
+	<include file="$(find controllers)/launch/$(arg controller).launch"/>
+
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="">
+		<param name="file_waypoints" value="$(arg file_waypoints)" />
+		<param name="file_waypoints_stamped" value="$(arg file_waypoints_stamped)" />
+	</node>
+	
+	<node name="data_record" pkg="controllers" type="data_record" output="screen" args=""/>
+	<node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/>
+	<!-- node name="motor_failure_pub" pkg="controllers" type="motor_failure_pub" output="screen" args=""/ -->
+	<node name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" args=""/>
+</launch>

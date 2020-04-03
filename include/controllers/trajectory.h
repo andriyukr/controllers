@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <iostream>
 #include <fstream>
-#include <geometry_msgs/QuaternionStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <rosgraph_msgs/Clock.h>
 #include <dynamic_reconfigure/server.h>
@@ -41,12 +41,16 @@ int trajectory_type;
 double speed;
 double straight_speed;
 
+// Trajectory size
+double scale;
+
 // Yaw angle
 double yaw_d, initial_local_yaw, last_yaw;
 
 // Waypoints
 MatrixXd waypoints;
 int waypoint;
+MatrixXd curve_parameters;
 
 // Time
 double t;
@@ -60,4 +64,6 @@ class Trajectory{
         private:
           double denormalizeAngle(double a1);
           double distance(Vector4d v1, Vector4d v2);
+          void readWaypoints(std::string fileName);
+          void readWaypointsStamped(std::string fileName);
 };

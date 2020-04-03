@@ -25,15 +25,15 @@ void odometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg){
 /* Reference trajectory callback function
  * Subscribes to the commanded trajectory topic
  */
-void trajectoryCallback(const QuaternionStamped& trajectory_msg){
-    pose_d << trajectory_msg.quaternion.x, trajectory_msg.quaternion.y, trajectory_msg.quaternion.z, trajectory_msg.quaternion.w;
+void trajectoryCallback(const geometry_msgs::PoseStamped& trajectory_msg){
+    pose_d << trajectory_msg.pose.position.x, trajectory_msg.pose.position.y, trajectory_msg.pose.position.z, trajectory_msg.pose.orientation.z;
 }
 
 /* Reference trajectory velocity callback function
  * Subscribes to the commanded trajectory velocity topic
  */
-void trajectoryVelocityCallback(const QuaternionStamped& velocity_msg){
-    velocity_d << velocity_msg.quaternion.x, velocity_msg.quaternion.y, velocity_msg.quaternion.z, velocity_msg.quaternion.w;
+void trajectoryVelocityCallback(const geometry_msgs::TwistStamped& velocity_msg){
+    velocity_d << velocity_msg.twist.linear.x, velocity_msg.twist.linear.y, velocity_msg.twist.linear.z, velocity_msg.twist.angular.z;
 }
 
 /* PD velocity callback function
@@ -67,8 +67,8 @@ ANN::ANN(int argc, char** argv){
     pd_subscriber = node_handle.subscribe("/uav/command_velocity_pd", 1, pdCallback); // for the command from PD controller
 
     // Publishers
-    velocity_publisher = node_handle.advertise<geometry_msgs::Quaternion>("/uav/command_velocity_ann", 1); // for the output from ANN (for debug)
-    ann_velocity_publisher = node_handle.advertise<geometry_msgs::Quaternion>("/ann/command_velocity", 1); // for the command signal
+    velocity_publisher = node_handle.advertise<geometry_msgs::TwistStamped>("/uav/command_velocity_ann", 1); // for the output from ANN (for debug)
+    ann_velocity_publisher = node_handle.advertise<geometry_msgs::TwistStamped>("/ann/command_velocity", 1); // for the command signal
     ann_params_publisher = node_handle.advertise<geometry_msgs::Quaternion>("/ann/params", 1); // for learning rates in ANN (for debug)
 
 	// Initializes the actual and desired states
@@ -147,26 +147,26 @@ void ANN::run(){
             //u_f(3) = update(3, e(3), e_d(3), u_c(3), dt); // yaw axis
 
 			// Publishes the control signal
-            geometry_msgs::Quaternion velocity_msg;
-            velocity_msg.x = u_c(0) - u_f(0);
-            velocity_msg.y = u_c(1) - u_f(1);
-            velocity_msg.z = u_c(2) - u_f(2);
-            velocity_msg.w = 0;//u_c(3) - u_f(3);
+            geometry_msgs::TwistStamped velocity_msg;
+            velocity_msg.twist.linear.x = u_c(0) - u_f(0);
+            velocity_msg.twist.linear.y = u_c(1) - u_f(1);
+            velocity_msg.twist.linear.z = u_c(2) - u_f(2);
+            velocity_msg.twist.angular.z = 0;//u_c(3) - u_f(3);
             velocity_publisher.publish(velocity_msg);
 
 			// Publishes the output from ANN (for debugging)
-            velocity_msg.x = -u_f(0);
-            velocity_msg.y = -u_f(1);
-            velocity_msg.z = -u_f(2);
-            velocity_msg.w = 0;
+            velocity_msg.twist.linear.x = -u_f(0);
+            velocity_msg.twist.linear.y = -u_f(1);
+            velocity_msg.twist.linear.z = -u_f(2);
+            velocity_msg.twist.angular.z = 0;
             ann_velocity_publisher.publish(velocity_msg);
 
 			// Publishes the update rates (for debugging)
-            velocity_msg.x = alpha(0);
+            /*velocity_msg.x = alpha(0);
             velocity_msg.y = alpha(1);
             velocity_msg.z = alpha(2);
             velocity_msg.w = alpha(3);
-            ann_params_publisher.publish(velocity_msg);
+            ann_params_publisher.publish(velocity_msg);*/
         }
 
         new_odometry = false;

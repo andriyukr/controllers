@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   sensor_msgs
   tf
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -57,11 +58,10 @@ find_package(Eigen REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  RollPitchYawThrust.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -78,10 +78,10 @@ find_package(Eigen REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -102,7 +102,7 @@ find_package(Eigen REQUIRED)
 #   cfg/DynReconf1.cfg
 #   cfg/DynReconf2.cfg
 # )
-generate_dynamic_reconfigure_options(cfg/setFNN.cfg cfg/setANN.cfg cfg/setFNN_IT2.cfg cfg/setDIT1FLC.cfg cfg/setSIT2FLC.cfg cfg/setDIT2FLC.cfg cfg/setPID.cfg cfg/setTrajectory.cfg cfg/setSafeY6.cfg cfg/setMotorFailure.cfg cfg/setMotorFailRC.cfg cfg/setDataRecord.cfg)
+generate_dynamic_reconfigure_options(cfg/setFNN.cfg cfg/setANN.cfg cfg/setFNN_IT2.cfg cfg/setDIT1FLC.cfg cfg/setSIT2FLC.cfg cfg/setDIT2FLC.cfg cfg/setPID.cfg cfg/setTrajectory.cfg cfg/setSafePX4.cfg cfg/setMotorFailure.cfg cfg/setMotorFailRC.cfg cfg/setDataRecord.cfg)
 
 ###################################
 ## catkin specific configuration ##
@@ -116,7 +116,7 @@ generate_dynamic_reconfigure_options(cfg/setFNN.cfg cfg/setANN.cfg cfg/setFNN_IT
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES controllers
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -208,9 +208,9 @@ target_link_libraries(teleop_key ${catkin_LIBRARIES})
 add_executable(safe_bebop src/safeBebop.cpp)
 target_link_libraries(safe_bebop ${catkin_LIBRARIES})
 
-add_executable(safe_y6 src/safeY6.cpp)
-target_link_libraries(safe_y6 ${catkin_LIBRARIES})
-add_dependencies(safe_y6 ${PROJECT_NAME}_gencfg)
+add_executable(safe_px4 src/safePX4.cpp)
+target_link_libraries(safe_px4 ${catkin_LIBRARIES})
+add_dependencies(safe_px4 ${PROJECT_NAME}_gencfg)
 
 add_executable(motor_failure_pub src/motorfailurepub.cpp)
 target_link_libraries(motor_failure_pub ${catkin_LIBRARIES})

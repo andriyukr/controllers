@@ -3,6 +3,8 @@
 #include <fstream>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <geometry_msgs/QuaternionStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <rosgraph_msgs/Clock.h>
 #include <dynamic_reconfigure/server.h>

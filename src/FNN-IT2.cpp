@@ -26,17 +26,15 @@ void odometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg){
 /* Reference trajectory callback function
  * Subscribes to the commanded trajectory topic
  */
-void trajectoryCallback(const QuaternionStamped& trajectory_msg){
-    pose_d << trajectory_msg.quaternion.x, trajectory_msg.quaternion.y, trajectory_msg.quaternion.z, trajectory_msg.quaternion.w;
-    //cout << "[FNN_IT2] position: " << pose_d.transpose() << endl;
+void trajectoryCallback(const geometry_msgs::PoseStamped& trajectory_msg){
+    pose_d << trajectory_msg.pose.position.x, trajectory_msg.pose.position.y, trajectory_msg.pose.position.z, trajectory_msg.pose.orientation.z;
 }
 
 /* Reference trajectory velocity callback function
  * Subscribes to the commanded trajectory velocity topic
  */
-void trajectoryVelocityCallback(const QuaternionStamped& velocity_msg){
-    velocity_d << velocity_msg.quaternion.x, velocity_msg.quaternion.y, velocity_msg.quaternion.z, velocity_msg.quaternion.w;
-    //cout << "[FNN_IT2] velocity_d: " << velocity_d.transpose() << endl;
+void trajectoryVelocityCallback(const geometry_msgs::TwistStamped& velocity_msg){
+    velocity_d << velocity_msg.twist.linear.x, velocity_msg.twist.linear.y, velocity_msg.twist.linear.z, velocity_msg.twist.angular.z;
 }
 
 /* PD velocity callback function

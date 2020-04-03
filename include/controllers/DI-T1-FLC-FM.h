@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <geometry_msgs/QuaternionStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <rosgraph_msgs/Clock.h>
 #include <dynamic_reconfigure/server.h>
 #include <controllers/setDIT1FLCConfig.h>

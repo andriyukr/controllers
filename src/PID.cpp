@@ -30,18 +30,15 @@ void odometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg){
 /* Reference trajectory callback function
  * Subscribes to the commanded trajectory topic
  */
-void trajectoryCallback(const QuaternionStamped& trajectory_msg){
-    pose_d << trajectory_msg.quaternion.x, trajectory_msg.quaternion.y, trajectory_msg.quaternion.z, trajectory_msg.quaternion.w;
-    //cout << "[PID] position_d: " << pose_d.transpose() << endl;
-    //cout << "[PID] position_yaw: " << pose_d(3) * 180 / M_PI << endl;
+void trajectoryCallback(const geometry_msgs::PoseStamped& trajectory_msg){
+    pose_d << trajectory_msg.pose.position.x, trajectory_msg.pose.position.y, trajectory_msg.pose.position.z, trajectory_msg.pose.orientation.z;
 }
 
 /* Reference trajectory velocity callback function
  * Subscribes to the commanded trajectory velocity topic
  */
-void trajectoryVelocityCallback(const QuaternionStamped& velocity_msg){
-    velocity_d << velocity_msg.quaternion.x, velocity_msg.quaternion.y, velocity_msg.quaternion.z, velocity_msg.quaternion.w;
-    //cout << "[PID] velocity_d: " << velocity_d.transpose() << endl;
+void trajectoryVelocityCallback(const geometry_msgs::TwistStamped& velocity_msg){
+    velocity_d << velocity_msg.twist.linear.x, velocity_msg.twist.linear.y, velocity_msg.twist.linear.z, velocity_msg.twist.angular.z;
 }
 
 /* Dynamic reconfigure callback function (from GUI)
@@ -70,7 +67,7 @@ PID::PID(int argc, char** argv){
     trajectory_velocity_subscriber = node_handle.subscribe("/uav/trajectory_velocity", 1, trajectoryVelocityCallback);
 
     // Publishers
-    velocity_publisher = node_handle.advertise<geometry_msgs::Quaternion>("/uav/command_velocity", 1);
+    velocity_publisher = node_handle.advertise<geometry_msgs::TwistStamped>("/uav/command_velocity", 1);
 
     pose << 0, 0, 0, 0;
     pose_d << 0, 0, 0, 0;
@@ -128,7 +125,7 @@ void PID::run(){
     ros::Rate rate(100);
     double time = 0;
     int c = 0;
-    geometry_msgs::Quaternion velocity_msg;
+    geometry_msgs::TwistStamped velocity_msg;
 
     int controller_type;
 
@@ -150,16 +147,11 @@ void PID::run(){
             error_d = velocity_d - velocity;
 
             // PID part
-            velocity_msg.x = k_p_xy * error(0) + k_i_xy * error_i(0) + k_d_xy * error_d(0);
-            velocity_msg.y = k_p_xy * error(1) + k_i_xy * error_i(1) + k_d_xy * error_d(1);
-            velocity_msg.z = k_p_z * error(2) + k_i_z * error_i(2) + k_d_z * error_d(2);
-
-            /*velocity_msg.x = k_p * error(0) + k_i * error_i(0) + k_d * error_d(0);
-            velocity_msg.y = k_p * error(1) + k_i * error_i(1) + k_d * error_d(1);
-            velocity_msg.z = k_p * error(2) + k_i * error_i(2) + k_d * error_d(2);*/
-
-            //velocity_msg.w = 0; //k_p * error(3);
-            velocity_msg.w = 0.5 * error(3);
+            velocity_msg.header.stamp = ros::Time::now();
+            velocity_msg.twist.linear.x = k_p_xy * error(0) + k_i_xy * error_i(0) + k_d_xy * error_d(0);
+            velocity_msg.twist.linear.y = k_p_xy * error(1) + k_i_xy * error_i(1) + k_d_xy * error_d(1);
+            velocity_msg.twist.linear.z = k_p_z * error(2) + k_i_z * error_i(2) + k_d_z * error_d(2);
+            velocity_msg.twist.angular.z = 0.5 * error(3);
 
             velocity_publisher.publish(velocity_msg);
 
