@@ -4,7 +4,7 @@
 	<arg name="controller" value="pid"/> <!-- pid, fnn, fnn_it2, ann, t1flc, di_t1_flc_fm, si_it2_flc, di_it2_flc, di_it2_flc_fm -->
 	<arg name="file_waypoints" value="$(find controllers)/policy/waypoints.txt"/>
 	<arg name="file_waypoints_stamped" value="$(find controllers)/policy/waypoints_stamped.txt"/>
-	<arg name="vehicle" value="uav"/>
+	<arg name="vehicle" value="px4"/>
 	<arg name="noise" default="0.00"/>
 
 	<remap from="/uav/command_velocity" to="/$(arg vehicle)/command_velocity"/>

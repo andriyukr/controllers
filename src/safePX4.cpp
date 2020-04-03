@@ -189,6 +189,13 @@ void commandVelocityCallback(const geometry_msgs::TwistStamped& command_msg){
     float r = bound(command_msg.twist.angular.z, MAX_V);
 
     velocity_d << vx, vy, vz, r;
+
+    float roll = bound(-command_msg.twist.linear.y, MAX_RP);
+    float pitch = bound(command_msg.twist.linear.x, MAX_RP);
+    float yaw = bound(command_msg.twist.angular.z, M_PI);
+    float thrust = bound(command_msg.twist.linear.z, MAX_V);
+
+    attitude_d << roll, pitch, yaw, thrust;
 }
 
 /* Command attitude callback function
@@ -288,7 +295,7 @@ SafePX4::SafePX4(int argc, char** argv){
     // Publishers
     position_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 1);
     velocity_publisher = node_handle.advertise<geometry_msgs::TwistStamped>("/mavros/setpoint_velocity/cmd_vel", 1);
-    attitude_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_attitude/target_attitude", 1);
+    attitude_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_attitude/attitude", 1);
     throttle_publisher = node_handle.advertise<mavros_msgs::Thrust>("/mavros/setpoint_attitude/thrust", 1);
     odometry_publisher = node_handle.advertise<nav_msgs::Odometry>("/px4/ground_truth/odometry", 1);
     noisy_odometry_publisher = node_handle.advertise<nav_msgs::Odometry>("/px4/odometry", 1);
@@ -513,8 +520,8 @@ void SafePX4::run(){
                  *
                  * */
                 yaw = position_d(3);
-                roll = bound((cos(yaw) * velocity_d(0) + sin(yaw) * velocity_d(1))/M_PI, 5*M_PI/18);  // based on max velocity and max attitude angles
-                pitch = bound((cos(yaw) * velocity_d(1) - sin(yaw) * velocity_d(0))/M_PI, 5*M_PI/18); // bound to 45 deg [M_PI/4] or 50 deg [5M_PI/18]
+                roll = bound((cos(yaw) * attitude_d(0) + sin(yaw) * attitude_d(1))/M_PI, 5*M_PI/18);  // based on max velocity and max attitude angles
+                pitch = bound((cos(yaw) * attitude_d(1) - sin(yaw) * attitude_d(0))/M_PI, 5*M_PI/18); // bound to 45 deg [M_PI/4] or 50 deg [5M_PI/18]
 
 
                 tf::Quaternion q = tf::createQuaternionFromRPY(roll, pitch, yaw);
@@ -540,7 +547,7 @@ void SafePX4::run(){
                  *                   max_thrust - min_thrust                                              cos (phi)   cos (theta)
                  *
                 */
-                thrust = ((((1) / (max_thrust - min_thrust)) * (m*9.81 - min_thrust)) + velocity_d(3)/7) * (1/(cos(roll)) + 1/(cos(pitch)) - 1); // based on available throttle
+                thrust = ((((1) / (max_thrust - min_thrust)) * (m*9.81 - min_thrust)) + attitude_d(3)/7) * (1/(cos(roll)) + 1/(cos(pitch)) - 1); // based on available throttle
                 throttle_msg.thrust = bound_T(thrust);       // Thrust bound between (0 & 1)
 
 
@@ -559,7 +566,7 @@ void SafePX4::run(){
                 quaternionTFToMsg(q, attitude_msg.pose.orientation);
 
                 // Thrust command
-                thrust = (((1 / (max_thrust - min_thrust)) * (m*9.81 - min_thrust)) + velocity_d(3)/7) * (1/(cos(roll)) + 1/(cos(pitch)) - 1); // real --
+                thrust = (((1 / (max_thrust - min_thrust)) * (m*9.81 - min_thrust)) + attitude_d(3)/7) * (1/(cos(roll)) + 1/(cos(pitch)) - 1); // real --
                 //throttle_msg.thrust = thrust;
                 throttle_msg.thrust = bound_T(thrust);  // Thrust bound from (0 - 1)
 
@@ -627,14 +634,14 @@ void SafePX4::run(){
 
                   // Calculate the attitude angles
                   yaw = position_d(3);
-                  roll = bound((cos(yaw) * velocity_d(0) + sin(yaw) * velocity_d(1))/M_PI, 5*M_PI/18);  // based on max velocity and max attitude angles
-                  pitch = bound((cos(yaw) * velocity_d(1) - sin(yaw) * velocity_d(0))/M_PI, 5*M_PI/18); // bound to 45 deg [M_PI/4] or 50 deg [5M_PI/18]
+                  roll = bound((cos(yaw) * attitude_d(0) + sin(yaw) * attitude_d(1))/M_PI, 5*M_PI/18);  // based on max velocity and max attitude angles
+                  pitch = bound((cos(yaw) * attitude_d(1) - sin(yaw) * attitude_d(0))/M_PI, 5*M_PI/18); // bound to 45 deg [M_PI/4] or 50 deg [5M_PI/18]
 
                   tf::Quaternion q = tf::createQuaternionFromRPY(roll, pitch, yaw);
                   quaternionTFToMsg(q, raw_target_att_msg.orientation);
 
                   // Thrust
-                  //thrust = ((((1) / (max_thrust - min_thrust)) * (m*9.81 - min_thrust)) + velocity_d(3)/7) * (1/(cos(roll)) + 1/(cos(pitch)) - 1); // test [based on available throttle]
+                  //thrust = ((((1) / (max_thrust - min_thrust)) * (m*9.81 - min_thrust)) + attitude_d(3)/7) * (1/(cos(roll)) + 1/(cos(pitch)) - 1); // test [based on available throttle]
                   //raw_target_att_msg.thrust = bound_T(thrust);
 
 

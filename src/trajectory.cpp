@@ -150,10 +150,11 @@ void Trajectory::readWaypointsStamped(std::string fileName){
         int points = 0;
         while(getline(myfile, line))
             ++points;
-        MatrixXd waypoints = MatrixXd(points - 1, 5);
+        MatrixXd waypoints = MatrixXd(points, 5);
 
         ifstream myfile(fileName);
         getline(myfile, line); // reads out the header
+	//waypoints.row(0) << 0, 0, 0, 0, 0;
         for(int i = 0; getline(myfile, line); ++i){
             string delimiter = "\t";
             size_t pos = 0;
@@ -163,11 +164,35 @@ void Trajectory::readWaypointsStamped(std::string fileName){
             }
             waypoints(i, 4) = atof(line.c_str()) / 180 * M_PI;
         }
+	waypoints.row(points - 1) << waypoints.row(points - 2);
+        waypoints(points - 1, 0) = waypoints(points - 2, 0) + 1;
         myfile.close();
         ROS_DEBUG_STREAM("[Trajectory] waypoints stamped:\n" << waypoints);
+        time_end = waypoints(points - 1,0);
+        curveFitting(waypoints);
     }
     else
         ROS_WARN_STREAM("[trajectory] Unable to open file with stamped waypoints: " << fileName);
+}
+
+void Trajectory::curveFitting(MatrixXd waypoints){
+    int points = waypoints.rows();
+    curve_parameters_pose = MatrixXd(points, 4);
+    curve_parameters_velocity = MatrixXd(points - 1, 4);
+    
+    MatrixXd times = MatrixXd(points, points);
+    for(int i = 0; i < points; ++i)
+        for(int j = 0; j < points; ++j)
+            times(i,j) = pow(waypoints(i,0), j);
+
+    ROS_DEBUG_STREAM("[trajectory] times.inverse():\n" << times.inverse());
+    ROS_DEBUG_STREAM("[trajectory] waypoints.rightCols(4):\n" << waypoints.rightCols(4));
+
+    curve_parameters_pose << times.inverse() * waypoints.rightCols(4);
+
+    ROS_DEBUG_STREAM("[trajectory] curve_parameters_pose:\n" << curve_parameters_pose); 
+
+    
 }
 
 void Trajectory::run(){
@@ -193,6 +218,7 @@ void Trajectory::run(){
     double R = sqrt(2) / 2;
     Vector4d w1;
     Vector4d w2;
+    VectorXd times = VectorXd(curve_parameters_pose.rows());
 
     double var_speed = 0;
     double d = 0;
@@ -249,22 +275,19 @@ void Trajectory::run(){
         case 4: // stamped waypoints
             t -= speed * dt;
             t += dt;
-            if(waypoint < waypoints.rows() - 1){
-                w1 << waypoints.row(waypoint).transpose();
-                w2 << waypoints.row(waypoint + 1).transpose();
-                double d = distance(w1, w2);
-                trajectory << (1 - t / d) * w1 + t / d * w2;
-                velocity << d / t;
-                if(t >= d){
-                    waypoint++;
-                }
-            }
-            else{
-                trajectory << waypoints.bottomRows(1).transpose();
+            if(t > time_end)
+                t = time_end;
+
+            for(int i = 0; i < curve_parameters_pose.rows(); ++i)
+                times(i) = pow(t, i);
+            trajectory <<  curve_parameters_pose.transpose() * times;
+
+            for(int i = 0; i < curve_parameters_pose.rows(); ++i) // analytical derivative of time
+                times(i) = i * pow(t, i-1);
+            velocity << curve_parameters_pose.transpose() * times;
+
+            if(t == time_end)
                 velocity << 0, 0, 0, 0;
-            }
-            if(t == 0)
-                ROS_INFO_STREAM("[Trajectory]: waypoint #" << waypoint << " = " << w2.transpose());
             break;
         case 5: // Circle
             trajectory << scale * sin(t/scale) + pose_d(0), scale * cos(t/scale) + pose_d(1), pose_d(2), pose_d(3);

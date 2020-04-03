@@ -50,7 +50,9 @@ double yaw_d, initial_local_yaw, last_yaw;
 // Waypoints
 MatrixXd waypoints;
 int waypoint;
-MatrixXd curve_parameters;
+MatrixXd curve_parameters_pose;
+MatrixXd curve_parameters_velocity;
+double time_end = 0;
 
 // Time
 double t;
@@ -66,4 +68,5 @@ class Trajectory{
           double distance(Vector4d v1, Vector4d v2);
           void readWaypoints(std::string fileName);
           void readWaypointsStamped(std::string fileName);
+          void curveFitting(MatrixXd waypoints);
 };
