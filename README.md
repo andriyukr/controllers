@@ -168,8 +168,9 @@ To build from source, clone the latest version from this repository into your ca
 	git clone https://github.com/andriyukr/controllers.git
 	sudo chmod -R 777 controllers/
 	cd ..
-	catkin_make
-
+	catkin build
+	
+If your workspace was previously built with `catkin_make`, then build the package using `catkin_make` instead of `catkin build`.
 
 ## Usage
 
