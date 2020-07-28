@@ -194,7 +194,7 @@ To select a controller, in `.launch` file, set `controller` argument to:
 - `pid` for proportional–integral–derivative (PID) controller,
 - `t1flc` for type-1 fuzzy logic controller,
 - `si_it2_flc` for single-input interval type-2 fuzzy logic controller,
-- `i_it2_flc` for double-input interval type-2 fuzzy logic controller,
+- `di_it2_flc` for double-input interval type-2 fuzzy logic controller,
 - `ann` for artificial neural network-based controller,
 - `fnn` for fuzzy neural network-based controller.
 
