@@ -39,7 +39,7 @@ void gazeboCallback(const gazebo_msgs::ModelStates::ConstPtr& gazebo_model_msg){
      int i = 0;
      if(!first_received){ // For the first time find required model name (index)
        while(!first_received){
-         if(!gazebo_model_msg->name[i].compare("iris") or !gazebo_model_msg->name[i].compare("y6")){
+         if(!gazebo_model_msg->name[i].compare("iris") or !gazebo_model_msg->name[i].compare("iris_rplidar") or !gazebo_model_msg->name[i].compare("y6")){
            index_name = i;
            first_received = true;
           //  cout<<"Number:  "<<index_name<<" ##### "<<gazebo_model_msg->name[i]<<endl;
@@ -62,11 +62,11 @@ public:
 
 
         // Subscribers
-        mocap_subscriber = node_handle.subscribe("/in_odometry", 1, gazeboCallback);
+        mocap_subscriber = node_handle.subscribe("/in_pose", 1, gazeboCallback);
         //mocap_subscriber = node_handle.subscribe("/gazebo/model_states", 1, gazeboCallback);
 
         // Publishers
-        mocap_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/out_odometry", 1);
+        mocap_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/out_pose", 1);
         //mocap_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 1);
     }
 

@@ -134,7 +134,7 @@ void PID::run(){
         rate.sleep();
         ros::spinOnce();
 
-        ros::param::get("/safe_y6/controller", controller_type);
+        ros::param::get("/safe_px4/controller", controller_type);
 
         if(controller_type != 0 && new_odometry){ // command
             pose(3) = denormalizeAngle(pose(3), pose_d(3));

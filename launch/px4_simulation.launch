@@ -12,7 +12,7 @@
 	<remap from="/uav/position" to="/$(arg vehicle)/position"/>
 	<remap from="/uav/velocity" to="/$(arg vehicle)/linear_velocity"/>
 	<remap from="/uav/noise/position" to="/$(arg vehicle)y6/noise/position"/>
-	<remap from="/uav/odometry" to="/$(arg vehicle)/odometry"/>
+	<remap from="/uav/odometry" to="/mavros/local_position/odom"/>
 	<remap from="/uav/true_odometry" to="/$(arg vehicle)/ground_truth/odometry"/>
 	<remap from="/uav/trajectory" to="/$(arg vehicle)/trajectory"/>
 	<remap from="/uav/trajectory_velocity" to="/$(arg vehicle)/trajectory_velocity"/>

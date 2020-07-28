@@ -100,14 +100,13 @@ Trajectory::~Trajectory(){
     exit(0);
 }
 
-// Function to normalize angles from -pi to pi
+// Function to denormalize angles from -pi to pi
 double Trajectory::denormalizeAngle(double a1){
     if(a1 > M_PI)
         a1 -= 2 * M_PI;
     else if(a1 < -M_PI)
         a1 += 2 * M_PI;
-    else
-        return a1;
+    return a1;
 }
 
 // Reads the file with waypoints
