@@ -134,7 +134,7 @@ abstract = "In this paper, Levenberg–Marquardt inspired sliding mode control t
 
 ## Installation
 
-This package has been tested under **ROS Kinetic** and **Ubuntu 16.04**.
+This package has been tested in **ROS Kinetic**/**Ubuntu 16.04**, **ROS Melodic**/**Ubuntu 18.04** and **ROS Noetic**/**Ubuntu 20.04**.
 
 ### Dependencies
 
