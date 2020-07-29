@@ -143,7 +143,7 @@ This package has been tested in **ROS Kinetic**/**Ubuntu 16.04**, **ROS Melodic*
 
 		sudo apt-get install libeigen3-dev
 		
-- [MAVROS](https://github.com/mavlink/mavros/blob/master/mavros/README.md#installation) - communication node for ROS:
+- (optional) [MAVROS](https://github.com/mavlink/mavros/blob/master/mavros/README.md#installation) - communication node for ROS:
 
 		sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
 
