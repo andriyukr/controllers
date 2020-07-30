@@ -23,10 +23,10 @@ Publisher mocap_publisher;
 // Subsribers
 Subscriber mocap_subscriber;
 
-geometry_msgs::PoseStamped pose_for_mavros;
+geometry_msgs::PoseStamped pose;
 bool first_received = false;
 int index_name = -1;
-std::string uav_name;
+std::string robot_name;
 
 // ********************** Callbacks **********************
 
@@ -34,44 +34,46 @@ std::string uav_name;
  * Subscribes to UAV state estimates, creates and publishes to mocap topic
  */
 void gazeboCallback(const gazebo_msgs::ModelStates::ConstPtr& gazebo_model_msg){
-     pose_for_mavros.header.stamp = ros::Time::now();
-
      int i = 0;
      if(!first_received){ // For the first time find required model name (index)
        while(!first_received){
-         if(!gazebo_model_msg->name[i].compare("iris") or !gazebo_model_msg->name[i].compare("iris_rplidar") or !gazebo_model_msg->name[i].compare("y6")){
+         if(!gazebo_model_msg->name[i].compare(robot_name)){
            index_name = i;
            first_received = true;
-          //  cout<<"Number:  "<<index_name<<" ##### "<<gazebo_model_msg->name[i]<<endl;
+           //cout<<"Number:  "<<index_name<<" ##### "<<gazebo_model_msg->name[i]<<endl;
          }
          i++;
-
        }
      }
-     pose_for_mavros.pose = gazebo_model_msg->pose[index_name];
-     mocap_publisher.publish(pose_for_mavros);
+
+     pose.header.stamp = ros::Time::now();
+     pose.header.frame_id = "map";
+     pose.pose = gazebo_model_msg->pose[index_name];
+     mocap_publisher.publish(pose);
 }
 
 
-class FakeMocapPX4{
+class FakeMocap{
 public:
     // Constructor
-    FakeMocapPX4(int argc, char** argv){
-        ros::init(argc, argv, "FakeMocapPX4");
+    FakeMocap(int argc, char** argv){
+        ros::init(argc, argv, "FakeMocap");
         ros::NodeHandle node_handle;
 
 
         // Subscribers
         mocap_subscriber = node_handle.subscribe("/in_pose", 1, gazeboCallback);
-        //mocap_subscriber = node_handle.subscribe("/gazebo/model_states", 1, gazeboCallback);
 
         // Publishers
         mocap_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/out_pose", 1);
-        //mocap_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 1);
+
+        if(!node_handle.getParam("/fake_mocap/robot", robot_name))
+            ROS_WARN_STREAM("[FakeMocap] Parameter 'robot' not defined!");
+        ROS_INFO_STREAM("[FakeMocap] Robot name: " << robot_name);
     }
 
     // Destructor
-    ~FakeMocapPX4(){
+    ~FakeMocap(){
         ros::shutdown();
         exit(0);
     }
@@ -87,9 +89,9 @@ public:
 };
 
 int main(int argc, char** argv){
-    cout << "[FakeMocapPX4] FakeMocapPX4 is running..." << endl;
+    ROS_INFO_STREAM("[FakeMocap] FakeMocap is running...");
 
-    FakeMocapPX4* fm = new FakeMocapPX4(argc, argv);
+    FakeMocap* fm = new FakeMocap(argc, argv);
 
     fm->run();
 }

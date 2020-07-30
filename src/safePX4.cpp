@@ -71,7 +71,7 @@ void optitrackCallback(const geometry_msgs::PoseStamped& optitrack_msg){
     odometry_msg.header.seq = optitrack_msg.header.seq;
     odometry_msg.header.stamp = optitrack_msg.header.stamp;
     odometry_msg.header.frame_id = optitrack_msg.header.frame_id;
-    odometry_msg.child_frame_id = "PX4";
+    //odometry_msg.child_frame_id = "PX4";
 
     odometry_msg.pose.pose.position.x = optitrack_msg.pose.position.x;
     odometry_msg.pose.pose.position.y = optitrack_msg.pose.position.y;
@@ -302,7 +302,6 @@ SafePX4::SafePX4(int argc, char** argv){
     test_msg_publish = node_handle.advertise<std_msgs::Float64>("/test_thrust",1);
     att_com_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/attitude_RPY/command", 1);
     att_local_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/attitude_RPY/local", 1);
-
     raw_pos_com_publisher = node_handle.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 1);
     raw_att_com_publisher = node_handle.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 1);
 
