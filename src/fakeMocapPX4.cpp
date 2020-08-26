@@ -62,7 +62,7 @@ public:
 
 
         // Subscribers
-        mocap_subscriber = node_handle.subscribe("/in_pose", 1, gazeboCallback);
+        mocap_subscriber = node_handle.subscribe("/in_pose", 1, gazeboCallback, ros::TransportHints().tcpNoDelay()); // ros::TransportHints().tcpNoDelay() needed to avoid communication delay
 
         // Publishers
         mocap_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("/out_pose", 1);
@@ -79,7 +79,7 @@ public:
     }
 
     void run(){
-        ros::Rate rate(100);
+        ros::Rate rate(1000);
         // Main loop - it runs until stopped/cancelled and the callback publishes mocap data
         while(ros::ok()){
             rate.sleep();
