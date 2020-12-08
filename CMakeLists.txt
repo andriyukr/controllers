@@ -210,7 +210,7 @@ target_link_libraries(safe_bebop ${catkin_LIBRARIES})
 
 add_executable(safe_px4 src/safePX4.cpp)
 target_link_libraries(safe_px4 ${catkin_LIBRARIES})
-add_dependencies(safe_px4 ${PROJECT_NAME}_gencfg)
+add_dependencies(safe_px4 ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(motor_failure_pub src/motorfailurepub.cpp)
 target_link_libraries(motor_failure_pub ${catkin_LIBRARIES})
