@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   tf
   message_generation
+  olympe_bridge
 )
 
 ## System dependencies are found with CMake's conventions
@@ -26,7 +27,6 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(gazebo REQUIRED)
 find_package(cmake_modules REQUIRED)
 find_package(Eigen REQUIRED)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -102,7 +102,7 @@ generate_messages(
 #   cfg/DynReconf1.cfg
 #   cfg/DynReconf2.cfg
 # )
-generate_dynamic_reconfigure_options(cfg/setFNN.cfg cfg/setANN.cfg cfg/setFNN_IT2.cfg cfg/setDIT1FLC.cfg cfg/setSIT2FLC.cfg cfg/setDIT2FLC.cfg cfg/setPID.cfg cfg/setTrajectory.cfg cfg/setSafePX4.cfg cfg/setMotorFailure.cfg cfg/setMotorFailRC.cfg cfg/setDataRecord.cfg)
+generate_dynamic_reconfigure_options(cfg/setFNN.cfg cfg/setANN.cfg cfg/setFNN_IT2.cfg cfg/setDIT1FLC.cfg cfg/setSIT2FLC.cfg cfg/setDIT2FLC.cfg cfg/setPID.cfg cfg/setTrajectory.cfg cfg/setSafePX4.cfg cfg/setSafeAnafi.cfg cfg/setMotorFailure.cfg cfg/setMotorFailRC.cfg cfg/setDataRecord.cfg)
 
 ###################################
 ## catkin specific configuration ##
@@ -162,7 +162,6 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-
 add_executable(fnn src/FNN.cpp)
 target_link_libraries(fnn ${catkin_LIBRARIES})
 add_dependencies(fnn ${PROJECT_NAME}_gencfg)
@@ -204,6 +203,9 @@ add_dependencies(trajectory ${PROJECT_NAME}_gencfg)
 
 add_executable(teleop_key src/teleopKey.cpp)
 target_link_libraries(teleop_key ${catkin_LIBRARIES})
+
+add_executable(safe_anafi src/safeAnafi.cpp)
+target_link_libraries(safe_anafi ${catkin_LIBRARIES})
 
 add_executable(safe_bebop src/safeBebop.cpp)
 target_link_libraries(safe_bebop ${catkin_LIBRARIES})

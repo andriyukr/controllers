@@ -8,60 +8,70 @@
 #include <ros/ros.h>
 #include <std_msgs/Int8.h>
 #include <geometry_msgs/Quaternion.h>
-#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <signal.h>
 #include <termios.h>
 #include <stdio.h>
 #include <pthread.h>
 
-#define KEYCODE_A       97
-#define KEYCODE_D       100
-#define KEYCODE_W       119
-#define KEYCODE_S       115
-#define KEYCODE_H       104
-#define KEYCODE_K       107
-#define KEYCODE_U       117
-#define KEYCODE_J       106
+#define KEYCODE_a       97
+#define KEYCODE_d       100
+#define KEYCODE_w       119
+#define KEYCODE_s       115
+#define KEYCODE_h       104
+#define KEYCODE_r       114
+#define KEYCODE_t       116
+#define KEYCODE_l       108
+#define KEYCODE_H       72
+#define KEYCODE_R       82
+#define KEYCODE_L       76
+
 #define KEYCODE_LEFT    68
 #define KEYCODE_RIGHT   67
 #define KEYCODE_UP      65
 #define KEYCODE_DOWN    66
-#define KEYCODE_Q       113
-#define KEYCODE_R       114
-#define KEYCODE_T       116
-#define KEYCODE_L       108
-#define KEYCODE_ESC     27
+#define KEYCODE_Esc     27
+#define KEYCODE_Insert  126
+#define KEYCODE_SPACE   32
 
-#define MAX_SPEED       1.0
+#define KEYCODE_8       56
+#define KEYCODE_4       52
+#define KEYCODE_5       53
+#define KEYCODE_6       54
+#define KEYCODE_2       50
+#define KEYCODE_MINUS   45
+#define KEYCODE_PLUS    43
+#define KEYCODE_Enter   10
+#define KEYCODE_0       48
+#define KEYCODE_DOT     46
+
+#define KEYCODE_F1      80
+#define KEYCODE_F2      81
 
 using namespace std;
 
 int kfd = 0;
 char c = 0;
+int seq = 1;
 struct termios cooked, raw;
 
 class Teleop{
 private:
     ros::NodeHandle node_handle;
     ros::Publisher command_publisher;
-    ros::Publisher velocity_publisher;
+    ros::Publisher move_publisher;
     ros::Publisher camera_publisher;
     std_msgs::Int8 command;
-    geometry_msgs::Quaternion velocity;
-    geometry_msgs::Vector3 camera;
 
 public:
     Teleop(){
         command.data = 0;
-        velocity.x = 0;
-        velocity.y = 0;
-        velocity.z = 0;
-        velocity.w = 0;
 
         // Publishers
-        command_publisher = node_handle.advertise<std_msgs::Int8>("/uav/command", 1);
-        velocity_publisher = node_handle.advertise<geometry_msgs::Quaternion>("/uav/command_velocity_keyboard", 1);
-        camera_publisher = node_handle.advertise<geometry_msgs::Vector3>("/uav/command_camera", 1);
+        command_publisher = node_handle.advertise<std_msgs::Int8>("/keyboard/command_meta", 1);
+        move_publisher = node_handle.advertise<geometry_msgs::TwistStamped>("/keyboard/command_move", 1);
+        camera_publisher = node_handle.advertise<geometry_msgs::Twist>("/keyboard/command_camera", 1);
     }
 
     ~Teleop(){
@@ -71,101 +81,125 @@ public:
     }
 
     void keyLoop(){
-        ros::Rate rate(100);
+        ros::Rate rate(20);
+
         while(ros::ok()){
             rate.sleep();
-            //cout << "[Teleop]: c = " << (int)c << endl;
+
+            geometry_msgs::TwistStamped move_msg;
+            geometry_msgs::Twist camera_msg;
+
+            if(c != 0){
+                ROS_DEBUG_STREAM("[Teleop] [1]: key = " << (int)c << endl);
+            }
+
             switch(c){
-            /* UAV movement */
-            case KEYCODE_A:
-                velocity.w = min(MAX_SPEED, velocity.w + MAX_SPEED);
-                break;
-            case KEYCODE_D:
-                velocity.w = max(-MAX_SPEED, velocity.w - MAX_SPEED);
-                break;
-            case KEYCODE_W:
-                velocity.z = min(MAX_SPEED, velocity.z + MAX_SPEED);
-                break;
-            case KEYCODE_S:
-                velocity.z = max(-MAX_SPEED, velocity.z - MAX_SPEED);
-                break;
-            case KEYCODE_RIGHT:
-                velocity.x = min(MAX_SPEED, velocity.x + MAX_SPEED);
-                break;
-            case KEYCODE_LEFT:
-                velocity.x = max(-MAX_SPEED, velocity.x - MAX_SPEED);
-                break;
-            case KEYCODE_UP:
-                velocity.y = min(MAX_SPEED, velocity.y + MAX_SPEED);
-                break;
-            case KEYCODE_DOWN:
-                velocity.y = max(-MAX_SPEED, velocity.y - MAX_SPEED);
-                break;
-
-
-            /* camera movement */
-            case KEYCODE_U:
-                camera.y = min(20.0, camera.y + 1);
-                break;
-            case KEYCODE_J:
-                camera.y = max(-40.0, camera.y - 1);
-                break;
-            /*case KEYCODE_H:
-                camera.z = max(-34.0, camera.z - 1);
-                break;*/
-            case KEYCODE_K:
-                camera.z = min(34.0, camera.z + 1);
-                break;
 
             /* UAV commands */
-            case KEYCODE_R:
+            case KEYCODE_Insert: // arm
                 command.data = 1;
-                velocity.x = 0;
-                velocity.y = 0;
-                velocity.z = 0;
-                velocity.w = 0;
-                command_publisher.publish(command);
                 command_publisher.publish(command);
                 break;
-            case KEYCODE_T:
+            case KEYCODE_t: // take-off
                 command.data = 2;
-                velocity.x = 0;
-                velocity.y = 0;
-                velocity.z = 0;
-                velocity.w = 0;
-                command_publisher.publish(command);
                 command_publisher.publish(command);
                 break;
-            case KEYCODE_L:
+            case KEYCODE_SPACE: // reset velocities to 0
+            case KEYCODE_R:
+            case KEYCODE_r:
+            case KEYCODE_H: // hower
+            case KEYCODE_h:
                 command.data = 3;
-                velocity.x = 0;
-                velocity.y = 0;
-                velocity.z = 0;
-                velocity.w = 0;
                 command_publisher.publish(command);
                 command_publisher.publish(command);
                 break;
-            case KEYCODE_ESC:
+            case KEYCODE_L: // land
+            case KEYCODE_l:
                 command.data = 4;
-                velocity.x = 0;
-                velocity.y = 0;
-                velocity.z = 0;
-                velocity.w = 0;
                 command_publisher.publish(command);
                 command_publisher.publish(command);
                 break;
-            case KEYCODE_H:
+            case KEYCODE_Esc: // switch off motors!
                 command.data = 5;
-                velocity.x = 0;
-                velocity.y = 0;
-                velocity.z = 0;
-                velocity.w = 0;
                 command_publisher.publish(command);
                 command_publisher.publish(command);
+                break;
+            case KEYCODE_F1: // remote control!
+                command.data = 101;
+                command_publisher.publish(command);
+                command_publisher.publish(command);
+                break;
+            case KEYCODE_F2: // offboard control!
+                command.data = 102;
+                command_publisher.publish(command);
+                command_publisher.publish(command);
+                break;
+
+                /* UAV movements */
+            case KEYCODE_a:
+                move_msg.twist.angular.z = 1;
+                break;
+            case KEYCODE_d:
+                move_msg.twist.angular.z = -1;
+                break;
+            case KEYCODE_w:
+                move_msg.twist.linear.z = 1;
+                break;
+            case KEYCODE_s:
+                move_msg.twist.linear.z = -1;
+                break;
+            case KEYCODE_RIGHT: // move right
+                move_msg.twist.linear.y = -1;
+                break;
+            case KEYCODE_LEFT: // move left
+                move_msg.twist.linear.y = 1;
+                break;
+            case KEYCODE_UP: // move forward
+                move_msg.twist.linear.x = 1;
+                break;
+            case KEYCODE_DOWN: // move backward
+                move_msg.twist.linear.x = -1;
+                break;
+
+                /* camera movements */
+            case KEYCODE_5: // reset to (0, 0)
+                camera_msg.angular.z = 1;
+                break;
+            case KEYCODE_4: // pitch left
+                camera_msg.angular.x = -1;
+                break;
+            case KEYCODE_6: // pitch right
+                camera_msg.angular.x = 1;
+                break;
+            case KEYCODE_8: // roll up
+                camera_msg.angular.y = 1;
+                break;
+            case KEYCODE_2: // roll down
+                camera_msg.angular.y = -1;
+                break;
+
+                /* camera commands */
+            case KEYCODE_PLUS: // zoom in
+                camera_msg.linear.x = 1;
+                break;
+            case KEYCODE_MINUS: // zoom out
+                camera_msg.linear.x = -1;
+                break;
+            case KEYCODE_Enter: // take picture
+                camera_msg.linear.z = 1;
+                break;
+            case KEYCODE_0: // start recording
+                camera_msg.linear.z = 2;
+                break;
+            case KEYCODE_DOT: // stop recording
+                camera_msg.linear.z = 3;
                 break;
             }
-            velocity_publisher.publish(velocity);
-            camera_publisher.publish(camera);
+            move_msg.header.stamp = ros::Time::now();
+            move_msg.header.frame_id = "/body";
+            move_publisher.publish(move_msg);
+            camera_publisher.publish(camera_msg);
+
             c = 0;
         }
     }
@@ -177,20 +211,21 @@ void quit(int sig){
     exit(0);
 }
 
-//This function will be called from a thread
+// This function is called from a thread
 void *readKey(void *) {
     // get the console in raw mode
     tcgetattr(kfd, &cooked);
     memcpy(&raw, &cooked, sizeof(struct termios));
     raw.c_lflag &=~ (ICANON | ECHO);
     // Setting a new line, then end of file
-    raw.c_cc[VEOL] = 1;
-    raw.c_cc[VEOF] = 2;
+    //raw.c_cc[VEOL] = 1;
+    //raw.c_cc[VEOF] = 2;
     tcsetattr(kfd, TCSANOW, &raw);
 
     while(true){
         // get the next event from the keyboard
         read(kfd, &c, 1);
+        //cout << "[Teleop] [2]: c = " << (int)c << endl;
     }
 }
 
@@ -198,7 +233,7 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "keyboard_teleop");
 
     cout << "Press key: \n";
-    cout << "r \t - reset \n";
+    cout << "Insert \t - arm \n";
     cout << "t \t - take-off \n";
     cout << "l \t - land \n";
     cout << "h \t - hover at position \n";

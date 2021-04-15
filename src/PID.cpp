@@ -124,7 +124,7 @@ void PID::run(){
     double dt = (double)1/100;
     ros::Rate rate(100);
     double time = 0;
-    int c = 0;
+    int seq = 1;
     geometry_msgs::TwistStamped velocity_msg;
 
     int controller_type;
@@ -147,7 +147,9 @@ void PID::run(){
             error_d = velocity_d - velocity;
 
             // PID part
+            velocity_msg.header.seq = seq++;
             velocity_msg.header.stamp = ros::Time::now();
+            velocity_msg.header.frame_id = "/world";
             velocity_msg.twist.linear.x = k_p_xy * error(0) + k_i_xy * error_i(0) + k_d_xy * error_d(0);
             velocity_msg.twist.linear.y = k_p_xy * error(1) + k_i_xy * error_i(1) + k_d_xy * error_d(1);
             velocity_msg.twist.linear.z = k_p_z * error(2) + k_i_z * error_i(2) + k_d_z * error_d(2);
@@ -157,9 +159,8 @@ void PID::run(){
 
             // Debug: calculate time taken to execute a loop
             //time += (ros::Time::now() - begin).toSec() * 1000;
-            //c++;
 
-            //cout << "[PID]: time = " << (time/c) << endl;
+            //cout << "[PID]: time = " << (time/(seq - 1)) << endl;
         }
 
         // Uncomment to not check for a new entry in the odometry
