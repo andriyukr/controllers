@@ -8,46 +8,35 @@
  *      - Constraints and safety: contains constraints and safety bounds for commands
  *      - Controller: lets the user choose between position/velocity/attitude commands
  *
+ * TODO's:
+ *      - Check velocities frame
+ *      - Tune velocity controller
+ *      - Filter accelerations
+ *
  * *********************************************************************/
 
 #include "controllers/safeAnafi.h"
 
-void push(double vx, double vy, double vz, double p, double q, double r){
-    Twist t;
-    t.linear.x = vx;
-    t.linear.y = vy;
-    t.linear.z = vz;
-    t.angular.x = p;
-    t.angular.y = q;
-    t.angular.z = r;
-
+Twist filter_velocities(Twist v){
     velocities.erase(velocities.begin());
-    velocities.push_back(t);
+    velocities.push_back(v);
+
+    Twist t;
+    for(vector<Twist>::iterator i = velocities.begin(); i != velocities.end(); ++i){
+        t.linear.x += i->linear.x/10;
+        t.linear.y += i->linear.y/10;
+        t.linear.z += i->linear.z/10;
+        t.angular.x += i->angular.x/10;
+        t.angular.y += i->angular.y/10;
+        t.angular.z += i->angular.z/10;
+    }
+    return t;
 }
 
-Twist filter(){
-    Twist t;
-    t.linear.x = 0;
-    t.linear.y = 0;
-    t.linear.z = 0;
-    t.angular.x = 0;
-    t.angular.y = 0;
-    t.angular.z = 0;
-    for(vector<Twist>::iterator i = velocities.begin(); i != velocities.end(); ++i){
-        t.linear.x += i->linear.x;
-        t.linear.y += i->linear.y;
-        t.linear.z += i->linear.z;
-        t.angular.x += i->angular.x;
-        t.angular.y += i->angular.y;
-        t.angular.z += i->angular.z;
-    }
-    t.linear.x /= 10;
-    t.linear.y /= 10;
-    t.linear.z /= 10;
-    t.angular.x /= 10;
-    t.angular.y /= 10;
-    t.angular.z /= 10;
-    return t;
+Vector4d filter_accelerations(Eigen::Ref<Eigen::VectorXd> a){
+    accelerations.topRows(9) = accelerations.bottomRows(9);
+    accelerations.row(9) = a;
+    return accelerations.colwise().sum()/10;
 }
 
 // ********************** Callbacks **********************
@@ -78,22 +67,22 @@ void optitrackCallback(const geometry_msgs::PoseStamped& optitrack_msg){
     odometry_msg.pose.pose.position.z = optitrack_msg.pose.position.z;
 
     tf::Quaternion q(optitrack_msg.pose.orientation.x, optitrack_msg.pose.orientation.y, optitrack_msg.pose.orientation.z, optitrack_msg.pose.orientation.w);
-    //q.normalize();
     tf::Matrix3x3 m(q);
     double roll, pitch;
     m.getRPY(roll, pitch, yaw);
-    //q = tf::createQuaternionFromRPY(roll, pitch, yaw);
     odometry_msg.pose.pose.orientation = optitrack_msg.pose.orientation;
 
-    double vx = (odometry_msg.pose.pose.position.x - position.x) / (dt.toNSec() / pow(10, 9));
-    double vy = (odometry_msg.pose.pose.position.y - position.y) / (dt.toNSec() / pow(10, 9));
-    double vz = (odometry_msg.pose.pose.position.z - position.z) / (dt.toNSec() / pow(10, 9));
-    double omega_x = (roll - orientation.x) / (dt.toNSec() / pow(10, 9));
-    double omega_y = (pitch - orientation.y) / (dt.toNSec() / pow(10, 9));
-    double omega_z = (yaw - orientation.z) / (dt.toNSec() / pow(10, 9));
-    push(vx, vy, vz, omega_x, omega_y, omega_z);
-    odometry_msg.twist.twist = filter();
+    Twist t;
+    t.linear.x = (odometry_msg.pose.pose.position.x - position.x) / (dt.toNSec() / pow(10, 9));
+    t.linear.y = (odometry_msg.pose.pose.position.y - position.y) / (dt.toNSec() / pow(10, 9));
+    t.linear.z = (odometry_msg.pose.pose.position.z - position.z) / (dt.toNSec() / pow(10, 9));
+    t.angular.x = (roll - orientation.x) / (dt.toNSec() / pow(10, 9));
+    t.angular.y = (pitch - orientation.y) / (dt.toNSec() / pow(10, 9));
+    t.angular.z = (yaw - orientation.z) / (dt.toNSec() / pow(10, 9));
+    odometry_msg.twist.twist = filter_velocities(t);
     odometry_publisher.publish(odometry_msg);
+
+    velocity << odometry_msg.twist.twist.linear.x, odometry_msg.twist.twist.linear.y, odometry_msg.twist.twist.linear.z, odometry_msg.twist.twist.angular.z;
 
     tf::Quaternion qc(noise.pose.pose.orientation.x, noise.pose.pose.orientation.y, noise.pose.pose.orientation.z, noise.pose.pose.orientation.w);
     tf::Quaternion rqc = q * qc;
@@ -118,19 +107,7 @@ void optitrackCallback(const geometry_msgs::PoseStamped& optitrack_msg){
     orientation.y = pitch;
     orientation.z = yaw;
 
-    velocity << vx, vy, vz, omega_z;
-
     marker_visibile = true;
-
-    //cout << "[SafeBebop] yaw = " << yaw << endl;
-    /*tf::Quaternion q1(odometry_msg.pose.pose.orientation.x, odometry_msg.pose.pose.orientation.y, odometry_msg.pose.pose.orientation.z, odometry_msg.pose.pose.orientation.w);
-    tf::Matrix3x3 m1(q1);
-    m1.getEulerZYX(z, y, x);
-    cout << "[SafeBebop]:" << endl;
-    cout << "x = " << odometry_msg.pose.pose.position.x << ",\t y =  " << odometry_msg.pose.pose.position.y << ",\t z = " << odometry_msg.pose.pose.position.z << endl;
-    cout << "roll = " << x << ",\t pitch =  " << y << ",\t yaw = " << z << endl;
-    cout << "vx = " << odometry_msg.twist.twist.linear.x << ",\t vy =  " << odometry_msg.twist.twist.linear.y << ",\t vz = " << odometry_msg.twist.twist.linear.z << endl;
-    cout << "p = " << odometry_msg.twist.twist.angular.x << ",\t q =  " << odometry_msg.twist.twist.angular.y << ",\t r = " << odometry_msg.twist.twist.angular.z << endl;*/
 }
 
 /*void arucoCallback(const aruco_mapping::ArucoMarker& aruco_msg){
@@ -189,6 +166,11 @@ void odometryCallback(const nav_msgs::Odometry odometry_msg){
         initial_yaw = yaw;
 
     velocity << odometry_msg.twist.twist.linear.x, odometry_msg.twist.twist.linear.y, odometry_msg.twist.twist.linear.z, 0;
+
+    /*velocity(0) = cos(yaw)*odometry_msg.twist.twist.linear.x - sin(yaw)*odometry_msg.twist.twist.linear.y; // rotation from world to body
+    velocity(1) = sin(yaw)*odometry_msg.twist.twist.linear.x + cos(yaw)*odometry_msg.twist.twist.linear.y; // rotation from world to body
+    velocity(2) = odometry_msg.twist.twist.linear.z;
+    velocity(3) = 0;*/
 
     geometry_msgs::Vector3 euler_msg;
     euler_msg.x = roll/M_PI*180;
@@ -278,7 +260,8 @@ void commandSkycontrollerCallback(const geometry_msgs::TwistStamped& command_msg
 }
 
 void desiredVelocityCallback(const geometry_msgs::TwistStamped& command_msg){
-    desired_attitude << command_msg.twist.linear.x, command_msg.twist.linear.y, command_msg.twist.linear.z, command_msg.twist.angular.z;}
+    desired_attitude << command_msg.twist.linear.x, command_msg.twist.linear.y, command_msg.twist.linear.z, command_msg.twist.angular.z;
+}
 
 void desiredAttitudeCallback(const geometry_msgs::TwistStamped& command_msg){
     desired_attitude << command_msg.twist.angular.y, -command_msg.twist.angular.x, command_msg.twist.linear.z, command_msg.twist.angular.z;
@@ -356,7 +339,7 @@ SafeAnafi::SafeAnafi(int argc, char** argv){
     desired_velocity << 0, 0, 0, 0;
     desired_attitude << 0, 0, 0, 0;
 
-    Twist t;
+    Twist t; 
     velocities.clear();
     for(int i = 0; i < 10; ++i)
         velocities.push_back(t);
@@ -416,6 +399,9 @@ void SafeAnafi::run(){
 
         if(//position.x < MAX_X && position.x > -MAX_X && position.y < MAX_Y && position.y > -MAX_Y && position.z < MAX_Z && position.z > 0 &&
                 marker_visibile){
+
+            double relative_yaw = yaw - initial_yaw;
+
             switch(controller){
             case 0: // pose
                 move_msg.twist.linear.x = 0;
@@ -426,16 +412,21 @@ void SafeAnafi::run(){
                 move_msg.twist.angular.z = 0;
                 break;
             case 1: // velocity
+                if(global) // rotate command from world frame to body frame
+                    move_command << cos(relative_yaw)*move_command(0) - sin(relative_yaw)*move_command(1), sin(relative_yaw)*move_command(0) + cos(relative_yaw)*move_command(1),
+                            move_command(2), move_command(3);
+
                 error = move_command - velocity;
                 //error = move_command; // FOR DEMO
 
                 error_i += error*dt;
                 error_i << bound(error_i(0), max_i(0)), bound(error_i(1), max_i(1)), bound(error_i(2), max_i(2)), bound(error_i(3), max_i(3));
                 error_d = (error - error_old)/dt;
+                error_d = filter_accelerations(error_d);
                 error_old = error;
 
                 rpyg_msg.roll = -(k_p(1)*error(1) + k_i(1)*error_i(1) + k_d(1)*error_d(1));
-                rpyg_msg.pitch =   k_p(0)*error(0) + k_i(0)*error_i(0) + k_d(0)*error_d(0);
+                rpyg_msg.pitch =  k_p(0)*error(0) + k_i(0)*error_i(0) + k_d(0)*error_d(0);
                 rpyg_msg.yaw = move_command(3);
                 rpyg_msg.gaz = move_command(2);
 
@@ -444,14 +435,13 @@ void SafeAnafi::run(){
             case 2: // attitude
                 rpyg_msg.roll = move_command(0);
                 rpyg_msg.pitch = move_command(1);
-                rpyg_msg.gaz = move_command(3);
+                rpyg_msg.yaw = move_command(3);
                 rpyg_msg.gaz = move_command(2);
                 break;
             }
             if(global && (controller == 1 || controller == 2)){ // rotate to global frame
                 double roll = rpyg_msg.roll;
                 double pitch = rpyg_msg.pitch;
-                double relative_yaw = yaw - initial_yaw;
                 rpyg_msg.roll = cos(relative_yaw)*roll + sin(relative_yaw)*pitch; // inverse rotation (from body to world)
                 rpyg_msg.pitch = -sin(relative_yaw)*roll + cos(relative_yaw)*pitch; // inverse rotation (from body to world)
             }
@@ -460,7 +450,7 @@ void SafeAnafi::run(){
             switch(controller){
             case 0: // pose
                 move_msg.header.stamp = ros::Time::now();
-                move_msg.header.frame_id = "/body";
+                move_msg.header.frame_id = "/world";
                 move_publisher.publish(move_msg);
                 break;
             case 1: // velocity

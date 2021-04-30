@@ -90,6 +90,7 @@ Vector4d desired_attitude;
 Point position;
 Point orientation;
 vector<Twist> velocities;
+MatrixXd accelerations = MatrixXd::Zero(10, 4);
 nav_msgs::Odometry noise;
 Time time_old;
 int sequence;
@@ -112,7 +113,4 @@ class SafeAnafi{
           SafeAnafi(int, char**);
           ~SafeAnafi();
           void run();
-    private:
-          void push(double vx, double vy, double vz, double p, double q, double r);
-          Twist filter();
 };
