@@ -145,7 +145,7 @@ This package has been tested in **ROS Kinetic**/**Ubuntu 16.04**, **ROS Melodic*
 		
 - (optional) [MAVROS](https://github.com/mavlink/mavros/blob/master/mavros/README.md#installation) - communication node for ROS:
 
-		sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
+		sudo apt-get install ros-${ROS_DISTRO}-mavros ros-${ROS_DISTRO}-mavros-extras
 
 	Then install GeographicLib datasets by running the `install_geographiclib_datasets.sh` script:
 
