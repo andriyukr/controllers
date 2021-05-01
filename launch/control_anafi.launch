@@ -3,10 +3,13 @@
 <launch>
 	<arg name="robotName" value="anafi"/>
 	<arg name="controller" value="pid"/> <!-- pid, t1flc, si_it2_flc, di_it2_flc, fnn -->
-	
+	<arg name="indoor" default="true"/>
+	<arg name="skycontroller" default="true"/>
+
 	<env name="ROSCONSOLE_FORMAT" value="[${severity}] [${time}] [${node}]: ${message}"/>
 	
-	<param name="indoor" type="boolean" value="true" />
+	<param name="indoor" type="boolean" value="$(arg indoor)" />
+	<param name="skycontroller" type="boolean" value="$(arg skycontroller)" />
 
 	<remap from="/uav/command" to="/$(arg robotName)/command"/>
 	<remap from="/uav/command_velocity" to="/$(arg robotName)/command_velocity"/>
