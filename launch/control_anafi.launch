@@ -10,6 +10,12 @@
 	
 	<param name="indoor" type="boolean" value="$(arg indoor)" />
 	<param name="skycontroller" type="boolean" value="$(arg skycontroller)" />
+	<param name="safe_anafi/bounds/x_min" type="double" value="-5.0" />
+	<param name="safe_anafi/bounds/x_max" type="double" value="5.0" />
+	<param name="safe_anafi/bounds/y_min" type="double" value="-5.0" />
+	<param name="safe_anafi/bounds/y_max" type="double" value="5.0" />
+	<param name="safe_anafi/bounds/z_min" type="double" value="0.0" />
+	<param name="safe_anafi/bounds/z_max" type="double" value="3.0" />
 
 	<remap from="/uav/command" to="/$(arg robotName)/command"/>
 	<remap from="/uav/command_velocity" to="/$(arg robotName)/command_velocity"/>

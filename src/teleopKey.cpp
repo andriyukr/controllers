@@ -105,8 +105,6 @@ public:
                 command_publisher.publish(command);
                 break;
             case KEYCODE_SPACE: // reset velocities to 0
-            case KEYCODE_R:
-            case KEYCODE_r:
             case KEYCODE_H: // hower
             case KEYCODE_h:
                 command.data = 3;
@@ -122,6 +120,11 @@ public:
             case KEYCODE_Esc: // switch off motors!
                 command.data = 5;
                 command_publisher.publish(command);
+                command_publisher.publish(command);
+                break;
+            case KEYCODE_R:
+            case KEYCODE_r:
+                command.data = 6;
                 command_publisher.publish(command);
                 break;
             case KEYCODE_F1: // remote control!
