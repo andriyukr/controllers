@@ -117,7 +117,7 @@ public:
                 command_publisher.publish(command);
                 command_publisher.publish(command);
                 break;
-            case KEYCODE_Esc: // switch off motors!
+            case KEYCODE_Esc: // disarm!
                 command.data = 5;
                 command_publisher.publish(command);
                 command_publisher.publish(command);

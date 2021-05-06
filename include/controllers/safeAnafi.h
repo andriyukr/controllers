@@ -19,7 +19,10 @@
 #include <controllers/setSafeAnafiConfig.h>
 #include <Eigen/Dense>
 #include <olympe_bridge/PilotingCommand.h>
+#include <olympe_bridge/MoveToCommand.h>
+#include <olympe_bridge/MoveByCommand.h>
 #include <olympe_bridge/CameraCommand.h>
+#include <olympe_bridge/SkyControllerCommand.h>
 
 #define FILTER_SIZE 		3
 
@@ -60,7 +63,8 @@ Publisher emergency_publisher;
 Publisher takeoff_publisher;
 Publisher land_publisher;
 Publisher offboard_publisher;
-Publisher move_publisher;
+Publisher moveto_publisher;
+Publisher moveby_publisher;
 Publisher rpyg_publisher;
 Publisher camera_publisher;
 Publisher euler_publisher;
@@ -123,6 +127,7 @@ double zoom = 1;
 int controller = 0;
 double max_tilt;
 double max_vertical_speed;
+double max_horizontal_speed;
 double max_yaw_rotation_speed;
 
 Time time_old;
