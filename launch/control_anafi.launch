@@ -2,7 +2,7 @@
 
 <launch>
 	<arg name="robotName" value="anafi"/>
-	<arg name="controller" value="pid"/> <!-- pid, t1flc, si_it2_flc, di_it2_flc, fnn -->
+	<arg name="controller" value="fm"/> <!-- pid, t1flc, si_it2_flc, di_it2_flc, fnn, fm -->
 	<arg name="indoor" default="true"/>
 	<arg name="skycontroller" default="true"/>
 
@@ -21,6 +21,7 @@
 	<remap from="/uav/command_velocity" to="/$(arg robotName)/command_velocity"/>
 	<remap from="/uav/command_velocity_keyboard" to="/$(arg robotName)/command_velocity"/>
 	<remap from="/uav/position" to="/$(arg robotName)/position"/>
+	<remap from="/uav/pose" to="/$(arg robotName)/pose"/>
 	<remap from="/uav/velocity" to="/$(arg robotName)/linear_velocity"/>
 	<remap from="/uav/odometry" to="/$(arg robotName)/odometry"/>
 	<remap from="/uav/true_odometry" to="/$(arg robotName)/ground_truth/odometry"/>
@@ -30,15 +31,20 @@
 	<remap from="/aruco_poses" to="/aruco/odometry"/>
 	
 	<node name="set_anafi_bridge_log_level" pkg="rosservice" type="rosservice" args="call --wait /anafi_bridge/set_logger_level 'rosout' 'info'" />
-	<node name="set_teleop_key_log_level" pkg="rosservice" type="rosservice" args="call --wait /teleop_key/set_logger_level 'ros.controllers' 'warn'" />
+	<node name="set_trajectory_log_level" pkg="rosservice" type="rosservice" args="call --wait /trajectory/set_logger_level 'ros.controllers' 'info'" />
+	<node name="set_teleop_key_log_level" pkg="rosservice" type="rosservice" args="call --wait /teleop_key/set_logger_level 'ros.controllers' 'info'" />
 	<node name="set_rviz_log_level" pkg="rosservice" type="rosservice" args="call --wait /rviz/set_logger_level 'ros' 'warn'" />
+	
 	
 	<node name="anafi_bridge" pkg="olympe_bridge" type="anafi_bridge.py" output="screen"/>
 	<node name="safe_anafi" pkg="controllers" type="safe_anafi" output="screen" args=""/>
 	<!-- Run in the terminal `xset r rate 10 40` to eliminate the delay after the first press of a key.
 	Later, run in the terminal `xset r rate 240 40` to reset the default delay. -->
 	<node name="teleop_key" pkg="controllers" type="teleop_key" output="screen" args=""/>
-	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="/home/andriy/catkin_ws/src/controllers/policy/waypoints.txt"/>
+	<node name="trajectory" pkg="controllers" type="trajectory" output="screen" args="">
+		<param name="file_waypoints" value="$(find controllers)/policy/waypoints.txt" />
+		<param name="file_waypoints_stamped" value="$(find controllers)/policy/waypoints_stamped.txt" />
+	</node>
 
 	<!-- include file="$(find controllers)/launch/$(arg controller).launch"/ -->
 	<!-- include file="$(find aruco_mapping)/launch/aruco_mapping.launch"/ -->

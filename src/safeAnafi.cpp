@@ -99,7 +99,7 @@ void optitrackCallback(const geometry_msgs::PoseStamped& optitrack_msg){
     marker_visibile = true;
 }
 
-void odometryCallback(const nav_msgs::Odometry odometry_msg){
+void odometryCallback(const nav_msgs::Odometry& odometry_msg){
     Duration dt = odometry_msg.header.stamp - time_old;
 
     tf::Quaternion q(odometry_msg.pose.pose.orientation.x, odometry_msg.pose.pose.orientation.y, odometry_msg.pose.pose.orientation.z, odometry_msg.pose.pose.orientation.w);
@@ -153,6 +153,7 @@ void commandMetaCallback(const std_msgs::Int8& command_msg){
     case 3: // hower
         rpyg_publisher.publish(rpyg_msg);
         rpyg_publisher.publish(rpyg_msg);
+        ros::param::set("/trajectory/trajectory", 1);
         break;
     case 4: // land
         rpyg_publisher.publish(rpyg_msg);

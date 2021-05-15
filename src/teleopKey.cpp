@@ -90,12 +90,28 @@ public:
             geometry_msgs::Twist camera_msg;
 
             if(c != 0){
-                ROS_DEBUG_STREAM("[Teleop] [1]: key = " << (int)c << endl);
+                ROS_DEBUG_STREAM("key = " << (int)c << endl);
             }
 
             switch(c){
+            case KEYCODE_H: // help
+            case KEYCODE_h:
+                cout << "Press: \n";
+                cout << "Insert \t - arm \n";
+                cout << "t \t - take-off \n";
+                cout << "l \t - land \n";
+                cout << "h \t - hover at position \n";
+                cout << "UP \t - move forward \n";
+                cout << "DOWN \t - move backward \n";
+                cout << "LEFT \t - move left \n";
+                cout << "RIGHT \t - move right \n";
+                cout << "w \t - move up \n";
+                cout << "s \t - move down \n";
+                cout << "a \t - yaw clockwise \n";
+                cout << "d \t - yaw counterclockwise \n";
+                break;
 
-            /* UAV commands */
+                /* UAV commands */
             case KEYCODE_Insert: // arm
                 command.data = 1;
                 command_publisher.publish(command);
@@ -105,8 +121,6 @@ public:
                 command_publisher.publish(command);
                 break;
             case KEYCODE_SPACE: // reset velocities to 0
-            case KEYCODE_H: // hower
-            case KEYCODE_h:
                 command.data = 3;
                 command_publisher.publish(command);
                 command_publisher.publish(command);
@@ -220,34 +234,16 @@ void *readKey(void *) {
     tcgetattr(kfd, &cooked);
     memcpy(&raw, &cooked, sizeof(struct termios));
     raw.c_lflag &=~ (ICANON | ECHO);
-    // Setting a new line, then end of file
-    //raw.c_cc[VEOL] = 1;
-    //raw.c_cc[VEOF] = 2;
     tcsetattr(kfd, TCSANOW, &raw);
 
-    while(true){
-        // get the next event from the keyboard
-        read(kfd, &c, 1);
-        //cout << "[Teleop] [2]: c = " << (int)c << endl;
-    }
+    while(true)
+        read(kfd, &c, 1); // get the next event from the keyboard
 }
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "keyboard_teleop");
 
-    cout << "Press key: \n";
-    cout << "Insert \t - arm \n";
-    cout << "t \t - take-off \n";
-    cout << "l \t - land \n";
-    cout << "h \t - hover at position \n";
-    cout << "UP \t - move forward \n";
-    cout << "DOWN \t - move backward \n";
-    cout << "LEFT \t - move left \n";
-    cout << "RIGHT \t - move right \n";
-    cout << "w \t - move up \n";
-    cout << "s \t - move down \n";
-    cout << "a \t - rotate clockwise \n";
-    cout << "d \t - rotate counterclockwise \n";
+    ROS_WARN("Press H for help!!!");
 
     pthread_t t;
     // Launch a thread

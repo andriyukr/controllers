@@ -4,6 +4,7 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <rosgraph_msgs/Clock.h>
+#include <tf/transform_datatypes.h>
 #include <dynamic_reconfigure/server.h>
 #include <controllers/setTrajectoryConfig.h>
 #include <Eigen/Dense>
@@ -11,28 +12,24 @@
 #include <std_msgs/Int8.h>
 #include <std_msgs/Int32.h>
 
+#define ROUND(v) (((v.array()*1e3).round()/1e3).transpose())
+
 using namespace geometry_msgs;
 using namespace std;
 using namespace ros;
 using namespace Eigen;
 
-using Eigen::Vector4d;
-
 // Subscribers
-ros::Subscriber attitude_subscriber;
 ros::Subscriber command_subscriber;
-ros::Subscriber local_pos_subscriber;
+ros::Subscriber pose_subscriber;
 
 // Publishers
 ros::Publisher trajectory_publisher;
 ros::Publisher velocity_publisher;
-ros::Publisher trajectory_type_pub;
-
-std_msgs::Int32 traj_type;
 
 // Pose
-Vector4d pose_d;
-Vector4d pose_act;
+Vector4d pose_d  = Vector4d::Zero();
+Vector4d pose = Vector4d::Zero();
 
 // Trajectory type
 int trajectory_type;
@@ -49,10 +46,10 @@ double yaw_d, initial_local_yaw, last_yaw;
 
 // Waypoints
 MatrixXd waypoints;
-int waypoint;
+int waypoint = 0;
 MatrixXd curve_parameters_pose;
 MatrixXd curve_parameters_velocity;
-double time_end = 0;
+VectorXd curve_time;
 
 // Time
 double t;
